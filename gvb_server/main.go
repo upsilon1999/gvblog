@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"gvb_server/core"
 	"gvb_server/global"
+	"gvb_server/routers"
 )
 
 func main() {
@@ -21,5 +21,12 @@ func main() {
 
 	//连接数据库，注册数据库实例
 	global.DB = core.InitGorm()
-	fmt.Println(global.DB)
+	// fmt.Println(global.DB)
+
+	//注册路由
+	router := routers.InitRouter()
+	// 根据system配置来设定监听目标
+	addr:=global.Config.System.Addr()
+	global.Log.Info("gvb_server正在监听:%s",addr)
+	router.Run(addr) 
 }

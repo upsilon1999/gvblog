@@ -32,3 +32,5 @@ func InitConf() {
 	//全局变量，就是将读取的到配置文件存储为全局变量
 	global.Config = c
 }
+
+//ps:因为日志的初始化要先读配置文件，所以这里无法使用global.Log
