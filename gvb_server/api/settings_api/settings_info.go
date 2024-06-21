@@ -1,6 +1,10 @@
 package settings_api
 
-import "github.com/gin-gonic/gin"
+import (
+	"gvb_server/models/res"
+
+	"github.com/gin-gonic/gin"
+)
 
 type SettingsApi struct{
 
@@ -8,7 +12,6 @@ type SettingsApi struct{
 
 //视图函数
 func (SettingsApi) SettingsInfoView(c *gin.Context) {
-	c.JSON(200, gin.H{
-		"msg": "xxx",
-	})
+	res.Success(map[string]string{},"xxx",c)
+	// res.FailWithCode(res.SettingsError,c)
 }
