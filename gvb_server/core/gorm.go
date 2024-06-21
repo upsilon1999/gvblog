@@ -11,7 +11,9 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+//gorm连接数据库
 func InitGorm() *gorm.DB {
+	//1.如果mysql的host为空就判定未设置mysql
 	if global.Config.Mysql.Host == "" {
 		log.Println("未配置mysql,取消gorm连接")
 		return nil
@@ -27,6 +29,7 @@ func InitGorm() *gorm.DB {
 	}
 	//global.MysqlLog = logger.Default.LogMode(logger.Info)
 
+	//db连接成功后的是数据库实例
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
 		Logger: mysqlLogger,
 	})
