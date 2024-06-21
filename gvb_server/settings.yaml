@@ -1,22 +1,23 @@
 mysql:
-    host: 127.0.0.1
-    port: 3306
-    db: gvb_db
-    username: root
-    password: 123456
-    config: ""
-    #日志等级
-    log_level: dev
+  host: 127.0.0.1
+  port: 3306
+  db: gvb_db
+  username: root
+  password: 123456
+  config: ""
+  #日志等级
+  log_level: dev
 logger:
-    level: info
-    #前缀
-    prefix: "[gvb]"
-    director: log
-    #是否显示行号
-    show_line: true
-    #是否显示文件路径
-    log_in_console: true
+  level: info
+  #前缀
+  prefix: "[gvb]"
+  director: log
+  #是否显示行号
+  show_line: true
+  #是否显示文件路径
+  log_in_console: true
 system:
-    host: "0.0.0.0"
-    port: 8080
-    env: dev
+  # 开发环境的程序运行在哪
+  host: "0.0.0.0"
+  port: 8080
+  env: dev

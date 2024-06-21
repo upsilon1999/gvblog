@@ -13,7 +13,7 @@ import (
 
 func InitGorm() *gorm.DB {
 	if global.Config.Mysql.Host == "" {
-		log.Println("未配置mysql，取消gorm连接")
+		log.Println("未配置mysql,取消gorm连接")
 		return nil
 	}
 	dsn := global.Config.Mysql.Dsn()

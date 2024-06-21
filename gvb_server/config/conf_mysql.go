@@ -9,7 +9,7 @@ type Mysql struct {
 	Username string `yaml:"username"`  //数据库用户名
 	Password string `yaml:"password"`  //数据库密码
 	Config   string `yaml:"config"`      //高级配置,例如charset
-	LogLevel string `yaml:"log_level"` // 日志等级，debug就是输出全部sql，dev, release
+	LogLevel string `yaml:"log_level"` // 日志等级，debug就是输出全部sql，dev开发环境, release线上环境
 }
 
 func (m *Mysql) Dsn() string {
