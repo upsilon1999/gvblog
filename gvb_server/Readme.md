@@ -26,10 +26,11 @@ tree 命令格式和参数：
 
 ```sh
 TREE [drive:][path] [/F] [/A]
-```
 
 /F 显示每个文件夹中文件的名称。（带扩展名）
 /A 使用 ASCII 字符，而不使用扩展字符。(如果要显示中文，例如 tree /f /A >tree.txt)
+```
+
 比如：
 
 > tree /f >tree.txt
