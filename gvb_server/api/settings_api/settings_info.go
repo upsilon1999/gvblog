@@ -12,6 +12,6 @@ type SettingsApi struct{
 
 //视图函数
 func (SettingsApi) SettingsInfoView(c *gin.Context) {
-	res.Success(map[string]string{},"xxx",c)
+	res.Ok(map[string]string{},"xxx",c)
 	// res.FailWithCode(res.SettingsError,c)
 }

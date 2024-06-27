@@ -2,6 +2,7 @@ package main
 
 import (
 	"gvb_server/core"
+	"gvb_server/flag"
 	"gvb_server/global"
 	"gvb_server/routers"
 )
@@ -23,10 +24,27 @@ func main() {
 	global.DB = core.InitGorm()
 	// fmt.Println(global.DB)
 
+
+	//命令行参数绑定
+	// go run main.go -db
+	//如果在者停止了web服务，后面有关web的就不该执行
+	option := flag.Parse()
+	if flag.IsWebStop(option){
+		flag.SwitchOption(option)
+		return
+	}
+
+	
+
+
+
 	//注册路由
 	router := routers.InitRouter()
 	// 根据system配置来设定监听目标
 	addr:=global.Config.System.Addr()
 	global.Log.Info("gvb_server正在监听:%s",addr)
-	router.Run(addr) 
+	err :=router.Run(addr)
+	if(err!=nil){
+		global.Log.Fatalf(err.Error())
+	} 
 }
