@@ -45,4 +45,8 @@ Tip：
 
 ## 数据库表生成
 
-关于数据库表的生成，先写好models，再用gorm的方法生成表。
+关于数据库表的生成，先写好 models，再用 gorm 的方法生成表。
+
+## gin 接收参数
+
+1.接收单个参数的形式 2.用结构体接收的形式，Shouldbindxx、MustBindxx

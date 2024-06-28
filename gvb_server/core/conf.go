@@ -54,7 +54,7 @@ func InitConf() {
 
 
 //修改配置文件
-func SetYmal() error {
+func SetYaml() error {
 	//读取修改后配置
 	/*
 		我们在执行修改的时候改变了global.Config全局对象
