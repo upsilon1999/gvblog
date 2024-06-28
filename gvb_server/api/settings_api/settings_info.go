@@ -1,17 +1,14 @@
 package settings_api
 
 import (
+	"gvb_server/global"
 	"gvb_server/models/res"
 
 	"github.com/gin-gonic/gin"
 )
 
-type SettingsApi struct{
-
-}
-
-//视图函数
+//系统信息查询
 func (SettingsApi) SettingsInfoView(c *gin.Context) {
-	res.Ok(map[string]string{},"xxx",c)
+	res.OkWithData(global.Config.SiteInfo,c)
 	// res.FailWithCode(res.SettingsError,c)
 }

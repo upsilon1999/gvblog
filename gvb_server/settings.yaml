@@ -1,4 +1,5 @@
 mysql:
+  # 书写规范,字段与值之间要有一个空格
   host: 127.0.0.1
   port: 3306
   db: gvb_db
@@ -21,3 +22,59 @@ system:
   host: "0.0.0.0"
   port: 8080
   env: dev
+# 网站系统信息
+site_info:
+  #创建时间
+  created_at: "2023-02-12"
+  bei_an: 备案信息
+  title: upsilon的个人博客
+  qq_image: qq图片地址
+  version: 1.0.0
+  email: upsilon1999@outlook.com
+  wechat_image: 微信图片地址
+  name: 求知
+  job: 全栈开发
+  addr: 日本东京
+  slogan: upsilon小栈
+  slogan_en: UPSILONHOME
+  web: http://www.zgry.fun
+  gitee_url: gitee地址
+  github_url: https://github.com/upsilon1999
+qq:
+  app_id: xx
+  key: xx
+  redirect: xx
+email:
+  host: xxx
+  port: 10
+  #发件人邮箱
+  user: xx
+  password: xxx
+  # 默认的发件人名字
+  default_from_email: xxx
+  #是否使用ssl
+  use_ssl: false
+  # 是否使用tls
+  user_tls: false
+qiliu:
+  #是否启用七牛云存储
+  enable: false
+  access_key:
+  secret_key:
+  # 存储桶的名字
+  bucket: xx
+  # 访问图片的地址的前缀
+  cdn: zgry
+  # 存储的地区
+  zone: China
+  # 前缀
+  prefix: upsilon
+  #存储的大小限制，单位是MB
+  size: 10
+jwt:
+  #密钥
+  secret: xx
+  #过期时间 默认单位是小时
+  expires: 48
+  #颁发人
+  issuer: xx
