@@ -78,3 +78,9 @@ jwt:
   expires: 48
   #颁发人
   issuer: xx
+# 本地文件上传
+upload:
+  # 上传路径
+  path: uploads/file
+  # 存储路径
+  store-path: uploads/file

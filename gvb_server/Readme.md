@@ -14,6 +14,7 @@
 ├─routers  gin路由的目录
 ├─service  项目与服务有关的目录
 ├─testdata 测试文件的目录
+├─uploads 上传文件存放的目录
 ├─utils 常用的一些工具合集
 ├─main.go 入口文件
 └─settings.yaml 配置文件
