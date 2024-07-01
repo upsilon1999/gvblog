@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"gvb_server/global"
 	"gvb_server/models/res"
+	"gvb_server/utils"
 	"io/fs"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,6 +17,22 @@ const (
 	//限制图片大小为2M
 	limitSize = 2
 )
+
+
+var (
+	// WhiteImageList 图片上传的白名单
+	WhiteImageList = []string{
+		"jpg",
+		"png",
+		"jpeg",
+		"ico",
+		"tiff",
+		"gif",
+		"svg",
+		"webp",
+	}
+)
+
 
 
 //功能：上传单个图片
@@ -83,6 +101,26 @@ func (ImagesApi) ImageUploadView(c *gin.Context){
 	// file实际上就是fileHeader类型的实例
 	for _,file := range fileList {
 		filePath := path.Join(basePath,file.Filename)
+
+		//判断图片是否位于白名单列表中
+		//根据截取后缀来判断,
+		//1.先将文件名按点分割，得到列表
+		imageNameList := strings.Split(file.Filename,".")
+		//2.获取最后的一个值，即后缀，并且转为小写，因为文件后缀不区分大小写
+		suffix := strings.ToLower(imageNameList[len(imageNameList)-1])
+		//3.判断后缀是否位于白名单内，
+		isInWhite := utils.InList(suffix,WhiteImageList)
+		//4.根据是否在白名单列表中进行处理
+		if !isInWhite {
+			resList = append(resList, FileUploadResponse{
+				FileName:  file.Filename,
+				IsSuccess: false,
+				Msg:"非法文件",
+			  })
+			  continue
+		}
+
+
 		// 判断大小
 		size := float64(file.Size) / float64(1024*1024)
 

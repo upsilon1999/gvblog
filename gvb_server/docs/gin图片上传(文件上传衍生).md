@@ -528,3 +528,119 @@ func (ImagesApi) ImageUploadView(c *gin.Context){
 	res.OkWithData(resList, c)
 }
 ```
+
+### 白名单、黑名单
+
+黑名单:判断文件名后缀，如果与黑名单中的后缀符合，那就拒绝上传
+
+白名单:只能上传在白名单中出现的文件后缀
+
+我们事先封装了一个方法，用于比较值是否在列表中，例如
+
+```go
+package utils
+
+// InList 判断key是否存在与列表中
+func InList(key string, list []string) bool {
+	for _, s := range list {
+	  if key == s {
+		return true
+	  }
+	}
+	return false
+  }
+```
+
+
+
+我们设置白名单列表,处理逻辑如下
+
+1.设置白名单列表
+
+```go
+var (
+  // WhiteImageList 图片上传的白名单
+  WhiteImageList = []string{
+    "jpg",
+    "png",
+    "jpeg",
+    "ico",
+    "tiff",
+    "gif",
+    "svg",
+    "webp",
+  }
+)
+```
+
+2.根据获取到的文件名进行处理
+
+```go
+func (ImagesApi) ImageUploadView(c *gin.Context){
+	// 使用gin封装的上传文件的方法，支持上传多个文件
+	form,err := c.MultipartForm()
+	if err!=nil{
+		res.FailWithMessage(err.Error(),c)
+		return
+	}
+
+	//form实际上是个文件列表
+	//form上有Value和File
+	//images是post传递文件对应的字段名
+	fmt.Println(form)
+	fileList,ok := form.File["images"]
+
+	if !ok {
+		res.FailWithMessage("不存在的文件",c)
+		return
+	}
+
+	var resList []FileUploadResponse
+
+	//遍历拿到的图片列表
+	// file实际上就是fileHeader类型的实例
+	for _,file := range fileList {
+		filePath := path.Join(basePath,file.Filename)
+
+		//判断图片是否位于白名单列表中
+		//根据截取后缀来判断,
+		//1.先将文件名按点分割，得到列表
+		imageNameList := strings.Split(file.Filename,".")
+		//2.获取最后的一个值，即后缀，并且转为小写，因为文件后缀不区分大小写
+		suffix := strings.ToLower(imageNameList[len(imageNameList)-1])
+		//3.判断后缀是否位于白名单内，
+		isInWhite := utils.InList(suffix,WhiteImageList)
+		//4.根据是否在白名单列表中进行处理
+		if !isInWhite {
+			resList = append(resList, FileUploadResponse{
+				FileName:  file.Filename,
+				IsSuccess: false,
+				Msg:"非法文件",
+			  })
+			  continue
+		}
+		// SaveUploadedFile(要写入的文件,要写入的文件路径)
+		err =c.SaveUploadedFile(file,filePath)
+		//写入失败
+		if err!=nil{
+			global.Log.Error(err)
+			resList = append(resList, FileUploadResponse{
+				FileName:  file.Filename,
+				IsSuccess: false,
+				Msg:       err.Error(),
+			})
+			continue
+		}
+
+		//写入成功
+		resList = append(resList, FileUploadResponse{
+			FileName:  filePath,
+			IsSuccess: true,
+			Msg:       "上传成功",
+		})
+	}
+
+	res.OkWithData(resList, c)
+}
+```
+

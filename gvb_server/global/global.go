@@ -15,3 +15,4 @@ var (
 	//日志全局变量
 	Log *logrus.Logger
 )
+
