@@ -5,7 +5,7 @@ mysql:
   db: gvb_db
   username: root
   password: 123456
-  config: ""
+  config: "parseTime=true"
   #日志等级
   log_level: dev
 logger:

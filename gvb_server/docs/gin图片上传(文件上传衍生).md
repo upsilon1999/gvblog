@@ -644,3 +644,232 @@ func (ImagesApi) ImageUploadView(c *gin.Context){
 }
 ```
 
+### 写入数据库
+
+在我们读取完成后，需要将上传图片的信息写入数据库，
+
+对应models
+
+```go
+package models
+
+import (
+	"gorm.io/gorm"
+	"gvb_server/global"
+	"gvb_server/models/ctype"
+	"os"
+)
+
+type BannerModel struct {
+	MODEL
+	Path      string          `json:"path"`                        // 图片路径
+	Hash      string          `json:"hash"`                        // 图片的hash值，用于判断重复图片
+	Name      string          `gorm:"size:38" json:"name"`         // 图片名称
+	ImageType ctype.ImageType `gorm:"default:1" json:"image_type"` // 图片的类型， 本地还是七牛
+}
+
+func (b *BannerModel) BeforeDelete(tx *gorm.DB) (err error) {
+	if b.ImageType == ctype.Local {
+		// 本地图片，删除，还要删除本地的存储
+		err = os.Remove(b.Path)
+		if err != nil {
+			global.Log.Error(err)
+			return err
+		}
+	}
+	return nil
+}
+```
+
+存入数据库
+
+```go
+//上传多个文件，返回url列表
+func (ImagesApi) ImageUploadView(c *gin.Context){
+	// 使用gin封装的上传文件的方法，支持上传多个文件
+	form,err := c.MultipartForm()
+	if err!=nil{
+		res.FailWithMessage(err.Error(),c)
+		return
+	}
+
+	//form实际上是个文件列表
+	//form上有Value和File
+	//images是post传递文件对应的字段名
+	fmt.Println(form)
+	fileList,ok := form.File["images"]
+
+	if !ok {
+		res.FailWithMessage("不存在的文件",c)
+		return
+	}
+
+
+	// 判断路径是否存在
+	//如果uoloads/file路径不存在
+	// 不存在就创建
+	basePath := global.Config.Upload.Path
+	_, err = os.ReadDir(basePath)
+	if err != nil {
+		// 递归创建
+		err = os.MkdirAll(basePath, fs.ModePerm)
+		if err != nil {
+			global.Log.Error(err)
+		}
+	}
+
+	var resList []FileUploadResponse
+
+	//遍历拿到的图片列表
+	// file实际上就是fileHeader类型的实例
+	for _,file := range fileList {
+		filePath := path.Join(basePath,file.Filename)
+
+		// SaveUploadedFile(要写入的文件,要写入的文件路径)
+		err =c.SaveUploadedFile(file,filePath)
+		//写入失败
+		if err!=nil{
+			global.Log.Error(err)
+			resList = append(resList, FileUploadResponse{
+				FileName:  file.Filename,
+				IsSuccess: false,
+				Msg:       err.Error(),
+			})
+			continue
+		}
+
+		//写入成功
+		resList = append(resList, FileUploadResponse{
+			FileName:  filePath,
+			IsSuccess: true,
+			Msg:       "上传成功",
+		})
+
+		//写入文件成功后，将图片内容写入数据库
+		global.DB.Create(&models.BannerModel{
+			Path:filePath,
+			Hash:imageHash,
+			Name:file.Filename,
+		})
+	}
+
+	res.OkWithData(resList, c)
+}
+```
+
+###  md5校验
+
+**golang的md5校验**
+
+值得完善的一点，关于golang的md5校验
+
+```go
+func Md5(src []byte){
+    m:= md5.New()
+    m.Write(src)
+    res:=hex.EncodeToString(m.Sum(nil))
+    return res
+}
+```
+
+获取到图片的内容并进行md5校验
+
+```go
+func (ImagesApi) ImageUploadView(c *gin.Context){
+	// 使用gin封装的上传文件的方法，支持上传多个文件
+	form,err := c.MultipartForm()
+	if err!=nil{
+		res.FailWithMessage(err.Error(),c)
+		return
+	}
+
+	//form实际上是个文件列表
+	//form上有Value和File
+	//images是post传递文件对应的字段名
+	fmt.Println(form)
+	fileList,ok := form.File["images"]
+
+	if !ok {
+		res.FailWithMessage("不存在的文件",c)
+		return
+	}
+
+
+	// 判断路径是否存在
+	//如果uoloads/file路径不存在
+	// 不存在就创建
+	basePath := global.Config.Upload.Path
+	_, err = os.ReadDir(basePath)
+	if err != nil {
+		// 递归创建
+		err = os.MkdirAll(basePath, fs.ModePerm)
+		if err != nil {
+			global.Log.Error(err)
+		}
+	}
+
+	var resList []FileUploadResponse
+
+	//遍历拿到的图片列表
+	// file实际上就是fileHeader类型的实例
+	for _,file := range fileList {
+		filePath := path.Join(basePath,file.Filename)
+
+        //获取到图片内容
+		fileObj,err := file.Open()
+		if err!=nil{
+			global.Log.Error(err)
+		}
+		byteData,err :=io.ReadAll(fileObj)
+		if err!=nil{
+			global.Log.Error(err)
+		}
+		//得到md5值
+		imageHash := utils.Md5(byteData)
+		fmt.Println(imageHash)
+
+		//根据imageHash去数据库查询图片是否存在
+		var bannerModel models.BannerModel
+		err = global.DB.Take(&bannerModel,"hash=?",imageHash).Error
+		if err!=nil{
+			//找到了
+			resList = append(resList, FileUploadResponse{
+				FileName:  bannerModel.Path,
+				IsSuccess: false,
+				Msg: "图片已存在",
+			})
+			continue
+		}
+
+		// SaveUploadedFile(要写入的文件,要写入的文件路径)
+		err =c.SaveUploadedFile(file,filePath)
+		//写入失败
+		if err!=nil{
+			global.Log.Error(err)
+			resList = append(resList, FileUploadResponse{
+				FileName:  file.Filename,
+				IsSuccess: false,
+				Msg:       err.Error(),
+			})
+			continue
+		}
+
+		//写入成功
+		resList = append(resList, FileUploadResponse{
+			FileName:  filePath,
+			IsSuccess: true,
+			Msg:       "上传成功",
+		})
+
+		//写入文件成功后，将图片内容写入数据库
+		global.DB.Create(&models.BannerModel{
+			Path:filePath,
+			Hash:imageHash,
+			Name:file.Filename,
+		})
+	}
+
+	res.OkWithData(resList, c)
+}
+```
+

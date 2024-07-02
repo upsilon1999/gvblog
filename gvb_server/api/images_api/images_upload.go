@@ -3,14 +3,17 @@ package images_api
 import (
 	"fmt"
 	"gvb_server/global"
+	"gvb_server/models"
 	"gvb_server/models/res"
 	"gvb_server/utils"
+	"io"
 	"io/fs"
 	"os"
 	"path"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 const (
@@ -133,6 +136,48 @@ func (ImagesApi) ImageUploadView(c *gin.Context){
 			continue
 		  }
 
+		//获取到图片内容
+		fileObj,err := file.Open()
+		if err!=nil{
+			global.Log.Error(err)
+		}
+		byteData,err :=io.ReadAll(fileObj)
+		if err!=nil{
+			global.Log.Error("读取出错",err)
+		}
+		//得到md5值
+		imageHash := utils.Md5(byteData)
+		fmt.Println(imageHash)
+
+		//根据imageHash去数据库查询图片是否存在
+		var bannerModel models.BannerModel
+		/*
+			查询
+			情况1: 查询出错  res.Error!=nil&&res.Error!=record
+			情况2:图片已存在 res.RowsAffected >0 记录数大于0
+			情况3:图片不存在且不报错
+		*/
+		res := global.DB.Take(&bannerModel,"hash=?",imageHash)
+		//查询出错
+		if res.Error!=nil&&res.Error!=gorm.ErrRecordNotFound{
+			global.Log.Error("查询出错",err)
+			resList = append(resList, FileUploadResponse{
+				FileName:  file.Filename,
+				IsSuccess: false,
+				Msg:       res.Error.Error(),
+			})
+			continue
+		}
+		//图片已存在
+		if res.RowsAffected>0{
+			resList = append(resList, FileUploadResponse{
+				FileName:  file.Filename,
+				IsSuccess: false,
+				Msg:       "图片已存在",
+			})
+			continue
+		}
+
 		// SaveUploadedFile(要写入的文件,要写入的文件路径)
 		err =c.SaveUploadedFile(file,filePath)
 		//写入失败
@@ -151,6 +196,13 @@ func (ImagesApi) ImageUploadView(c *gin.Context){
 			FileName:  filePath,
 			IsSuccess: true,
 			Msg:       "上传成功",
+		})
+
+		//写入文件成功后，将图片内容写入数据库
+		global.DB.Create(&models.BannerModel{
+			Path:filePath,
+			Hash:imageHash,
+			Name:file.Filename,
 		})
 	}
 
