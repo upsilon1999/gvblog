@@ -822,7 +822,7 @@ func (ImagesApi) ImageUploadView(c *gin.Context){
 		}
 		byteData,err :=io.ReadAll(fileObj)
 		if err!=nil{
-			global.Log.Error(err)
+			global.Log.Error("读取出错",err)
 		}
 		//得到md5值
 		imageHash := utils.Md5(byteData)
@@ -830,13 +830,29 @@ func (ImagesApi) ImageUploadView(c *gin.Context){
 
 		//根据imageHash去数据库查询图片是否存在
 		var bannerModel models.BannerModel
-		err = global.DB.Take(&bannerModel,"hash=?",imageHash).Error
-		if err!=nil{
-			//找到了
+		/*
+			查询
+			情况1: 查询出错  res.Error!=nil&&res.Error!=record
+			情况2:图片已存在 res.RowsAffected >0 记录数大于0
+			情况3:图片不存在且不报错
+		*/
+		res := global.DB.Take(&bannerModel,"hash=?",imageHash)
+		//查询出错
+		if res.Error!=nil&&res.Error!=gorm.ErrRecordNotFound{
+			global.Log.Error("查询出错",err)
 			resList = append(resList, FileUploadResponse{
-				FileName:  bannerModel.Path,
+				FileName:  file.Filename,
 				IsSuccess: false,
-				Msg: "图片已存在",
+				Msg:       res.Error.Error(),
+			})
+			continue
+		}
+		//图片已存在
+		if res.RowsAffected>0{
+			resList = append(resList, FileUploadResponse{
+				FileName:  file.Filename,
+				IsSuccess: false,
+				Msg:       "图片已存在",
 			})
 			continue
 		}
@@ -873,3 +889,241 @@ func (ImagesApi) ImageUploadView(c *gin.Context){
 }
 ```
 
+## 图片列表查询
+
+**简易查询返回结果**
+
+```go
+func (ImagesApi) ImageListView(c *gin.Context) {
+	var imagesList []models.BannerModel
+
+    //select * from banner_model
+	global.DB.Find(&imagesList)
+
+	res.OkWithData(imagesList,c)
+}
+```
+
+获取列表的长度、分页的逻辑
+
+```go
+func (ImagesApi) ImageListView(c *gin.Context) {
+	var cr models.PageInfo
+	err := c.ShouldBindQuery(&cr)
+	if err!=nil{
+		res.FailWithCode(res.ArgumentError,c)
+		return 
+	}
+	var imagesList []models.BannerModel
+
+	//获取总条数
+	//select count(*) from banner_model
+	count:=global.DB.Find(&imagesList).RowsAffected
+
+	// cr.Page当前页码 cr.Limit每页取多少条
+	offset := (cr.Page-1)*cr.Limit
+    if offset<0{
+        offset = 0
+    }
+
+	//分页操作，一页取一条数据
+	//select * from banner_model limit 1 offset 1
+	//global.DB.Limit(1).Offset(1).Find(&imagesList)
+	global.DB.Limit(cr.Limit).Offset(offset).Find(&imagesList)
+    
+    res.OkWithData(gin.H{"count":count,"list":imagesList},c)
+}
+```
+
+单独封装一个分页的方法
+
+```go
+type Option struct {
+  models.PageInfo
+  Debug bool
+}
+
+func ComList[T any](model T, option Option) (list []T, count int64, err error) {
+
+  DB := global.DB
+    //开启mysql日志打印模式
+  if option.Debug {
+    DB = global.DB.Session(&gorm.Session{Logger: global.MysqlLog})
+  }
+  if option.Sort == "" {
+    option.Sort = "created_at desc" // 默认按照时间往前排
+  }
+
+  count = DB.Select("id").Find(&list).RowsAffected
+  offset := (option.Page - 1) * option.Limit
+  if offset < 0 {
+    offset = 0
+  }
+  err = DB.Limit(option.Limit).Offset(offset).Order(option.Sort).Find(&list).Error
+
+  return list, count, err
+}
+```
+
+使用封装好的函数进行返回
+
+```go
+type ListResponse[T any] struct {
+	Count int64 `json:"count"`
+	List  T     `json:"list"`
+}
+
+func OkWithList(list any, count int64, c *gin.Context) {
+	OkWithData(ListResponse[any]{
+		List:  list,
+		Count: count,
+	}, c)
+}
+
+func (ImagesApi) ImageListView(c *gin.Context) {
+	var cr models.PageInfo
+	err := c.ShouldBindQuery(&cr)
+	if err != nil {
+	  res.FailWithCode(res.ArgumentError, c)
+	  return
+	}
+  
+	list, count, err := common.ComList(models.BannerModel{}, common.Option{
+	  PageInfo: cr,
+	  Debug:    false,
+	})
+  
+	res.OkWithList(list, count, c)
+  
+	return
+}
+```
+
+## 图片删除
+
+使用到了钩子函数
+
+```go
+type BannerModel struct {
+  MODEL
+  Path      string          `json:"path"`                        // 图片路径
+  Hash      string          `json:"hash"`                        // 图片的hash值，用于判断重复图片
+  Name      string          `gorm:"size:38" json:"name"`         // 图片名称
+  ImageType ctype.ImageType `gorm:"default:1" json:"image_type"` // 图片的类型， 本地还是七牛
+}
+
+//删除图片信息前一并删除本地图片
+func (b *BannerModel) BeforeDelete(tx *gorm.DB) (err error) {
+  if b.ImageType == ctype.Local {
+    // 本地图片，删除，还要删除本地的存储
+    err = os.Remove(b.Path)
+    if err != nil {
+      global.Log.Error(err)
+      return err
+    }
+  }
+  return nil
+}
+```
+
+这里的BeforeDelete是gorm钩子函数的命名，具体的可以访问gorm官网文档查询hook
+
+使用到了批量删除
+
+```go
+package images_api
+
+import (
+	"fmt"
+	"gvb_server/global"
+	"gvb_server/models"
+	"gvb_server/models/res"
+
+	"github.com/gin-gonic/gin"
+)
+
+type RemoveRequest struct{
+	IDList []uint `json:"id_list"`
+}
+
+
+func (ImagesApi) ImageRemoveView(c *gin.Context) {
+	var cr RemoveRequest
+	err := c.ShouldBindJSON(&cr)
+	if err!=nil{
+		res.FailWithCode(res.ArgumentError,c)
+		return 
+	}
+	var imageList []models.BannerModel
+	//查看查到的记录数
+	count:=global.DB.Find(&imageList,cr.IDList).RowsAffected
+	if count == 0{
+		res.FailWithMessage("图片不存在",c)
+		return
+	}
+	global.DB.Delete(&imageList)
+	res.OkWithMessage(fmt.Sprintf("共删除%d张图片",count),c)
+}
+```
+
+## 图片信息修改
+
+这里以修改图片名为例
+
+```go
+package images_api
+
+import (
+	"gvb_server/global"
+	"gvb_server/models"
+	"gvb_server/models/res"
+
+	"github.com/gin-gonic/gin"
+)
+
+type ImageUpdateRequest struct {
+	ID   uint   `json:"id" binding:"required" msg:"请选择文件id"`
+	Name string `json:"name" binding:"required" msg:"请输入文件名称"`
+}
+//修改图片信息
+func (ImagesApi) ImageUpdateView(c *gin.Context) {
+	var cr ImageUpdateRequest
+	err := c.ShouldBindJSON(&cr)
+	if err != nil {
+	  res.FailWithError(err, &cr, c)
+	  return
+	}
+	var imageModel models.BannerModel
+	count := global.DB.Take(&imageModel, cr.ID).RowsAffected
+	if count == 0 {
+	  res.FailWithMessage("文件不存在", c)
+	  return
+	}
+	err = global.DB.Model(&imageModel).Update("name", cr.Name).Error
+	if err != nil {
+	  res.FailWithMessage(err.Error(), c)
+	  return
+	}
+	res.OkWithMessage("图片名称修改成功", c)
+	return
+  
+  }
+```
+
+gorm版本差异,在老版本中
+
+```go
+count := global.DB.Take(&imageModel, cr.ID).RowsAffected
+```
+
+可以替换成
+
+```go
+err = global.DB.Take(&imageModel, cr.ID).Error()
+if err != nil {
+	  res.FailWithMessage("文件不存在", c)
+	  return
+}
+```
+
+但是在新版本中如果没有找到,err也会报错，所以采用记录数进行判断
