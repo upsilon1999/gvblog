@@ -13,7 +13,7 @@ type BannerModel struct {
 	Path      string          `json:"path"`                        // 图片路径
 	Hash      string          `json:"hash"`                        // 图片的hash值，用于判断重复图片
 	Name      string          `gorm:"size:38" json:"name"`         // 图片名称
-	ImageType ctype.ImageType `gorm:"default:1" json:"image_type"` // 图片的类型， 本地还是七牛
+	ImageType ctype.ImageType `gorm:"default:1" json:"imageType"` // 图片的类型， 本地还是七牛
 }
 // 删除图片信息前一并删除本地图片
 // 这里的BeforeDelete是gorm钩子函数的命名，具体的可以访问gorm官网文档查询hook
