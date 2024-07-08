@@ -11,6 +11,9 @@ func (router RouterGroup) AdvertRouter() {
 	   advert.POST("create", advertApi.AdvertCreateView)
 	   //获取广告列表
 	   advert.GET("list",advertApi.AdvertListView)
+	   //修改广告
+	   advert.PUT("update/:id",advertApi.AdvertUpdateView)
+
 	}
    
   }

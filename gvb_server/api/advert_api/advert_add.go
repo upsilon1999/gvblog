@@ -8,8 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-
-
 //增加广告
 func (AdvertApi) AdvertCreateView(c *gin.Context) {
 	var cr AdvertRequest
@@ -36,7 +34,7 @@ func (AdvertApi) AdvertCreateView(c *gin.Context) {
 		Title: cr.Title,
 		Href: cr.Href,
 		Images: cr.Images,
-		IsShow: cr.IsShow,
+		IsShow: *cr.IsShow,
 	}).Error
 	if err!=nil{
 		global.Log.Error(err)
