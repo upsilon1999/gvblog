@@ -29,7 +29,9 @@ func (ImagesApi) ImageListView(c *gin.Context) {
 	  Debug:    false,
 	})
   
+	if err != nil {
+		res.FailWithCode(res.ArgumentError, c)
+		return
+	}
 	res.OkWithList(list, count, c)
-  
-	return
 }

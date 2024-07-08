@@ -11,6 +11,8 @@ func (router RouterGroup) ImagesRouter() {
 		images.POST("uploads", imagesApi.ImageUploadView) //上传多个图片
 		images.GET("list", imagesApi.ImageListView) 
 		images.DELETE("delete", imagesApi.ImageRemoveView)//批量删除图片
-		images.PUT("updateName",imagesApi.ImageUpdateView)
+		images.PUT("updateName",imagesApi.ImageUpdateView)//修改图片名称
+		images.GET("listNames", imagesApi.ImageNameListView) //获取简易图片列表
+		
 	}
 }
