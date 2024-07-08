@@ -13,7 +13,8 @@ func (router RouterGroup) AdvertRouter() {
 	   advert.GET("list",advertApi.AdvertListView)
 	   //修改广告
 	   advert.PUT("update/:id",advertApi.AdvertUpdateView)
-
+	   //删除广告
+	   advert.DELETE("delete",advertApi.AdvertRemoveView)
 	}
    
   }
