@@ -10,7 +10,7 @@ func (router RouterGroup) ImagesRouter() {
 		images.POST("single", imagesApi.OneImageUpload) 
 		images.POST("uploads", imagesApi.ImageUploadView) //上传多个图片
 		images.GET("list", imagesApi.ImageListView) 
-		images.DELETE("images", imagesApi.ImageRemoveView)//批量删除图片
+		images.DELETE("delete", imagesApi.ImageRemoveView)//批量删除图片
 		images.PUT("updateName",imagesApi.ImageUpdateView)
 	}
 }

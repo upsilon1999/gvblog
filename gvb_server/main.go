@@ -2,11 +2,17 @@ package main
 
 import (
 	"gvb_server/core"
+	_ "gvb_server/docs" // swag init生成后的docs路径
 	"gvb_server/flag"
 	"gvb_server/global"
 	"gvb_server/routers"
 )
 
+// @title API文档
+// @version 1.0
+// @description API文档
+// @host 127.0.0.01:9000
+// @BasePath /
 func main() {
 	// 执行读取配置文件的操作
 	core.InitConf()

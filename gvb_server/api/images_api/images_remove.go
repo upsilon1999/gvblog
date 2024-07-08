@@ -9,9 +9,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-
-
-
+// ImageRemoveView 批量删除图片
+// @Tags 图片管理
+// @Summary 批量删除图片
+// @Description 批量删除图片
+// @Param token header string  true  "token"
+// @Param data body models.RemoveRequest    true  "图片id列表"
+// @Router /api/images/delete [delete]
+// @Produce json
+// @Success 200 {object} res.Response{}
 func (ImagesApi) ImageRemoveView(c *gin.Context) {
 	var cr models.RemoveRequest
 	err := c.ShouldBindJSON(&cr)

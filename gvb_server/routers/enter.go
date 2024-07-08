@@ -2,6 +2,8 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	gs "github.com/swaggo/gin-swagger"
 )
 
 type RouterGroup struct {
@@ -11,6 +13,8 @@ type RouterGroup struct {
 //初始化路由
 func InitRouter() *gin.Engine {
 	router := gin.Default()
+
+	router.GET("/swagger/*any", gs.WrapHandler(swaggerFiles.Handler))
 	// 路由分组
 	apiRouterGroup := router.Group("api")
 

@@ -8,7 +8,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//增加广告
+// AdvertCreateView 添加广告
+// @Tags 广告管理
+// @Summary 创建广告
+// @Description 创建广告
+// @Param data body AdvertRequest    true  "表示多个参数"
+// @Param token header string  true  "token"
+// @Router /api/advert/create [post]
+// @Produce json
+// @Success 200 {object} res.Response{}
 func (AdvertApi) AdvertCreateView(c *gin.Context) {
 	var cr AdvertRequest
 	err := c.ShouldBindJSON(&cr)
