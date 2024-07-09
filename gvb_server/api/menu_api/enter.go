@@ -12,7 +12,7 @@ type ImageSort struct {
 
 type MenuRequest struct {
 	Title         string      `json:"title" binding:"required" msg:"请完善菜单名称" structs:"title"`
-	TitleEn         string      `json:"titleEn" binding:"required" msg:"请完善菜单英文名称" structs:"titleEn"`
+	TitleEn         string      `json:"titleEn" binding:"required" msg:"请完善菜单英文名称" structs:"title_en"`
 	Path          string      `json:"path" binding:"required" msg:"请完善菜单路径" structs:"path"`
 	Slogan        string      `json:"slogan" structs:"slogan"`
 	Abstract      ctype.Array `json:"abstract" structs:"abstract"`

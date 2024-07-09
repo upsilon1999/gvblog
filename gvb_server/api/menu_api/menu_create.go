@@ -1,6 +1,7 @@
 package menu_api
 
 import (
+	"fmt"
 	"gvb_server/global"
 	"gvb_server/models"
 	"gvb_server/models/res"
@@ -17,8 +18,15 @@ func (MenuApi) MenuCreateView(c *gin.Context) {
 	}
 
 	// 重复值判断
-
-
+	fmt.Println(cr)
+	//判断依据:标题或路径相同就是重复的
+	var menuList []models.MenuModel
+	count := global.DB.Find(&menuList,"title = ? or path = ?",cr.Title,cr.Path).RowsAffected
+	fmt.Print(count)
+	if count >0 {
+		res.FailWithMessage("插入的菜单信息重复",c)
+		return
+	}
 	//这应该写在一个事务里面，否则会出现插入菜单表成功，但是插入另一张表失败的案例
 
 	// 1.创建banner数据入库
