@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 func TestJwt(t *testing.T) {
-	token,err:=jwt.GenTokenforTest(jwt.JwtPayLoad{
+	token,err:=jwts.GenTokenforTest(jwt.JwtPayLoad{
 		UserID: 1,
 		Role: 1,
 		Username: "upsilon",

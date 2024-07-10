@@ -1,4 +1,4 @@
-package jwt
+package jwts
 
 import (
 	"errors"
@@ -10,7 +10,9 @@ import (
 
 // ParseToken 解析 token
   func ParseToken(tokenStr string) (*CustomClaims, error) {
+	//传入token需要的密钥，要与生成token使用的一样
 	MySecret := []byte(global.Config.Jwt.Secret)
+	// 解析token
 	token, err := jwt.ParseWithClaims(tokenStr, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 	  return MySecret, nil
 	})

@@ -1,4 +1,4 @@
-package jwt
+package jwts
 
 import (
 	"fmt"
@@ -10,7 +10,9 @@ import (
 
 // GenToken 创建 Token
 func GenToken(user JwtPayLoad) (string, error) {
+	
 	fmt.Println(global.Config.Jwt)
+	//密钥
 	MySecret := []byte(global.Config.Jwt.Secret)
 	claim := CustomClaims{
 	  user,
@@ -20,7 +22,9 @@ func GenToken(user JwtPayLoad) (string, error) {
 	  },
 	}
   
+	//生成token对象
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
+	//生成token字符串
 	return token.SignedString(MySecret)
   }
   
