@@ -1,6 +1,9 @@
 package routers
 
-import "gvb_server/api"
+import (
+	"gvb_server/api"
+	"gvb_server/middleware"
+)
 
 //获取siteInfo配置信息
 func (router RouterGroup) UserRouter() {
@@ -10,7 +13,7 @@ func (router RouterGroup) UserRouter() {
 	   //邮箱或用户名登录
 	   user.POST("emailLogin", UserApi.EmailLoginView)
 	   //获取用户列表
-	   user.GET("list",UserApi.UserListView)
+	   user.GET("list",middleware.JwtAuth(),UserApi.UserListView)
 	}
    
   }
