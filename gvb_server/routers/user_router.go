@@ -14,6 +14,10 @@ func (router RouterGroup) UserRouter() {
 	   user.POST("emailLogin", UserApi.EmailLoginView)
 	   //获取用户列表
 	   user.GET("list",middleware.JwtAuth(),UserApi.UserListView)
+	   //管理员修改用户权限
+	   user.POST("updateRole",middleware.JwtAdmin(),UserApi.UserUpdateRoleView)
+	   //用户修改密码
+	   user.POST("updatePwd",middleware.JwtAuth(),UserApi.UserUpdatePassword)
 	}
    
   }
