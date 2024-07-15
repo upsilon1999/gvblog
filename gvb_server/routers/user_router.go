@@ -20,6 +20,9 @@ func (router RouterGroup) UserRouter() {
 	   user.POST("updatePwd",middleware.JwtAuth(),UserApi.UserUpdatePassword)
 	   //用户注销
 	   user.POST("logout",middleware.JwtAuth(),UserApi.LogoutView)
+	   //创建用户
+	   user.POST("create",middleware.JwtAdmin(),UserApi.UserCreateView)
+
 	}
    
   }
