@@ -18,6 +18,8 @@ func (router RouterGroup) UserRouter() {
 	   user.POST("updateRole",middleware.JwtAdmin(),UserApi.UserUpdateRoleView)
 	   //用户修改密码
 	   user.POST("updatePwd",middleware.JwtAuth(),UserApi.UserUpdatePassword)
+	   //用户注销
+	   user.POST("logout",middleware.JwtAuth(),UserApi.LogoutView)
 	}
    
   }

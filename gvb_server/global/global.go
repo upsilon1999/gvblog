@@ -3,6 +3,7 @@ package global
 import (
 	"gvb_server/config"
 
+	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -17,5 +18,7 @@ var (
 	Log *logrus.Logger
 	//全局mysql日志
 	MysqlLog logger.Interface
+	//全局redis
+	Redis *redis.Client
 )
 
