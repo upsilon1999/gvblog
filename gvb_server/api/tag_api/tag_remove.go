@@ -32,6 +32,8 @@ func (TagApi) TagRemoveView(c *gin.Context) {
 		res.FailWithMessage("标签不存在", c)
 		return
 	}
+
+	//todo:如果这个标签下面有文章该如何处理?
 	global.DB.Delete(&tagList)
 	res.OkWithMessage(fmt.Sprintf("共删除 %d 个标签", count), c)
 
