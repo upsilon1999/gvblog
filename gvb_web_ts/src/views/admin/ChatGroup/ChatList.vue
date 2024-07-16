@@ -1,4 +1,4 @@
-<template></template>
+<template>聊天记录</template>
 
 <script setup lang="ts"></script>
 
