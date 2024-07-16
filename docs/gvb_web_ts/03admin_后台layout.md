@@ -1,3 +1,10 @@
+## 侧边栏
+
+左侧的logo和菜单区域
+
+`admin/index.vue`
+
+```vue
 <template>
   <div class="gvb-admin">
     <!-- 
@@ -52,6 +59,127 @@
       </div>
     </aside>
     <main>
+      <RouterView />
+    </main>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { RouterView } from "vue-router";
+import {
+  IconMenuFold,
+  IconMenuUnfold,
+  IconApps,
+  IconBug,
+  IconBulb,
+} from "@arco-design/web-vue/es/icon";
+</script>
+
+<style scoped lang="scss">
+.gvb-admin {
+  display: flex;
+
+  aside {
+    width: 240px;
+
+    //左侧灰色分隔线
+    border-right: 1px solid var(--bg);
+    height: 100dvh;
+
+    .gvb-logo {
+      height: 90px;
+      display: flex;
+      padding: 20px;
+      align-items: center;
+        
+      //底部分隔线
+      border-bottom: 1px solid var(--bg);
+      
+      img {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+      }
+      .logo-head {
+        margin-left: 20px;
+        > span:nth-child(1) {
+          font-size: 22px;
+        }
+        > span:nth-child(2) {
+          font-size: 12px;
+        }
+      }
+    }
+  }
+
+  main {
+    //注意calc的减号两端要留空格，否则会报错
+    width: calc(100% - 240px);
+  }
+}
+</style>
+```
+
+### logo区域
+
+```html
+ <!-- 
+    logo区域 分为左右结构，左侧是图片，右侧是文字  
+-->
+<div class="gvb-logo">
+	<img src="/images/logo.jpg" alt="" />
+    <div class="logo-head">
+      <span>小邓知识库</span>
+      <span>upsilon's store</span>
+    </div>
+</div>
+```
+
+样式
+
+```scss
+.gvb-logo {
+  height: 90px;
+  display: flex;
+  padding: 20px;
+  //实现图片与左侧垂直居中
+  align-items: center;
+    
+  //底部分隔线
+  border-bottom: 1px solid var(--bg);
+    
+  //图片
+  img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+  }
+  //文字
+  .logo-head {
+    margin-left: 20px;
+    > span:nth-child(1) {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    > span:nth-child(2) {
+      font-size: 12px;
+    }
+  }
+}
+```
+
+## 头部区域
+
+左右结构，左边为面包屑导航，右侧是功能模块和个人信息
+
+```vue
+<template>
+  <div class="gvb-admin">
+    <aside>
+     ...
+    </aside>
+    <main>
       <!-- 
         头部区域 
         分为左右区域，左边为面包屑，右边是功能按钮和个人信息
@@ -100,16 +228,7 @@
           </div>
         </div>
       </div>
-
-      <div class="gvb-tabs">
-        <span class="gvb-tab active">首页</span>
-        <span class="gvb-tab">用户列表</span>
-        <span class="gvb-tab">文章列表</span>
-      </div>
-      <!-- 内容区域 -->
-      <div class="gvb-container">
-        <RouterView />
-      </div>
+      <RouterView />
     </main>
   </div>
 </template>
@@ -130,38 +249,7 @@ import {
   display: flex;
 
   aside {
-    width: 240px;
-
-    //左侧灰色分隔线
-    border-right: 1px solid var(--bg);
-    height: 100dvh;
-
-    .gvb-logo {
-      height: 90px;
-      display: flex;
-      padding: 20px;
-      align-items: center;
-
-      //底部分隔线
-      border-bottom: 1px solid var(--bg);
-
-      img {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-      }
-      .logo-head {
-        margin-left: 20px;
-        > span:nth-child(1) {
-          font-size: 22px;
-          font-weight: 600;
-          margin-bottom: 5px;
-        }
-        > span:nth-child(2) {
-          font-size: 12px;
-        }
-      }
-    }
+   ...
   }
 
   main {
@@ -205,6 +293,63 @@ import {
         }
       }
     }
+  }
+}
+</style>
+```
+
+## tabs区域
+
+在头部区域和展示区中间有一条导航tab栏
+
+```vue
+<template>
+  <div class="gvb-admin">
+    <aside>
+      ...
+    </aside>
+    <main>
+      ...
+
+      <div class="gvb-tabs">
+        <span class="gvb-tab active">首页</span>
+        <span class="gvb-tab">用户列表</span>
+        <span class="gvb-tab">文章列表</span>
+      </div>
+      <!-- 内容区域 -->
+      <div class="gvb-container">
+        <RouterView />
+      </div>
+    </main>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { RouterView } from "vue-router";
+import {
+  IconHome,
+  IconSun,
+  IconApps,
+  IconBug,
+  IconBulb,
+} from "@arco-design/web-vue/es/icon";
+</script>
+
+<style scoped lang="scss">
+.gvb-admin {
+  display: flex;
+
+  aside {
+    ...
+  }
+
+  main {
+    //注意calc的减号两端要留空格，否则会报错
+    width: calc(100% - 240px);
+
+    .gvb-head {
+		...
+    }
 
     .gvb-tabs {
       height: 30px;
@@ -230,12 +375,40 @@ import {
         }
       }
     }
-
-    .gvb-container {
-      background-color: var(--bg);
-      min-height: calc(100dvh - 90px);
-      padding: 20px;
-    }
   }
 }
 </style>
+```
+
+了解sass中的`&`,实际上就是指代父元素
+
+## 拓展
+
+css变量作用域的问题，我们在tabs中使用了一个激活样式，来源自`theme.css`
+
+```css
+:root {
+  --bg: #f0eeee;
+  --active: #165dff;
+}
+```
+
+我们想要让这个激活样式采用Arco的主题色，
+
+```sh
+【:root】
+代表html页面，是最外层的父元素
+```
+
+而Arco的主题色是body变量，所以我们无法在`:root`中使用，要想使用,可以
+
+```css
+:root {
+  --bg: #f0eeee;
+}
+body{
+  --active: var(rgb(var(--arcoblue-6)));
+}
+```
+
+具体哪些可用，参考Arco的设计变量和F12查看页面的body
