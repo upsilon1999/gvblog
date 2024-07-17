@@ -37,7 +37,8 @@ const router = createRouter({
               path: "userInfo",
               //个人信息
               name: "userInfo",
-              component: () => import("../views/admin/UserCenter/UserInfo.vue"),
+              component: () =>
+                import("../views/admin/UserCenter/UserInfo/index.vue"),
             },
           ],
         },
@@ -49,7 +50,8 @@ const router = createRouter({
             {
               path: "articleList",
               name: "articleList",
-              component: () => import("../views/admin/Article/ArticleList.vue"),
+              component: () =>
+                import("../views/admin/Article/ArticleList/index.vue"),
             },
           ],
         },
@@ -61,7 +63,8 @@ const router = createRouter({
             {
               path: "chatList",
               name: "chatList",
-              component: () => import("../views/admin/ChatGroup/ChatList.vue"),
+              component: () =>
+                import("../views/admin/ChatGroup/ChatList/index.vue"),
             },
           ],
         },
@@ -73,7 +76,8 @@ const router = createRouter({
             {
               path: "menuList",
               name: "menuList",
-              component: () => import("../views/admin/System/MenuList.vue"),
+              component: () =>
+                import("../views/admin/System/MenuList/index.vue"),
             },
           ],
         },
@@ -85,7 +89,8 @@ const router = createRouter({
             {
               path: "userList",
               name: "userList",
-              component: () => import("../views/admin/Users/UserList.vue"),
+              component: () =>
+                import("../views/admin/Users/UserList/index.vue"),
             },
           ],
         },
