@@ -3,6 +3,7 @@ package global
 import (
 	"gvb_server/config"
 
+	"github.com/olivere/elastic/v7"
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -20,5 +21,7 @@ var (
 	MysqlLog logger.Interface
 	//全局redis
 	Redis *redis.Client
+	//全局es
+	ESClient *elastic.Client
 )
 

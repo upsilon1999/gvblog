@@ -93,3 +93,12 @@ redis:
   password: "123456789"
   #连接池大小
   pool_size: 100
+es:
+  #es服务地址
+  host: "http://127.0.0.1"
+  #es端口
+  port: 9200
+  # 用户名，未设置为空
+  username:
+  # 密码，未设置为空
+  password:

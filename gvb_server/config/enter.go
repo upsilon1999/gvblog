@@ -11,4 +11,5 @@ type Config struct {
 	Jwt      Jwt      `yaml:"jwt"`
 	Upload   Upload   `yaml:"upload"`
 	Redis    Redis    `yaml:"redis"`
+	Es       Es       `yaml:"es"`
 }

@@ -34,6 +34,10 @@ func main() {
 	//初始化redis
 	global.Redis = core.ConnectRedis()
 
+	//初始化es
+	core.EsConnect()
+
+
 	//命令行参数绑定
 	// go run main.go -db
 	//如果在者停止了web服务，后面有关web的就不该执行

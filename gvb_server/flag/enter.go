@@ -12,17 +12,24 @@ type Option struct {
     预计形式 -u admin 就是admin用户，user就是普通用户
   */
   User string 
+  /*
+    -es create 创建索引
+    -es delete 删除索引
+  */
+  Es string
 }
 
 // Parse 解析命令行参数
 func Parse() Option {
   db := sys_flag.Bool("db", false, "初始化数据库")
   user:= sys_flag.String("u","","创建用户")
+  es := sys_flag.String("es","","es操作")
   // 解析命令行参数写入注册的flag里
   sys_flag.Parse()
   return Option{
     DB: *db,
     User: *user,
+    Es:*es,
   }
 }
 
@@ -56,6 +63,14 @@ func SwitchOption(option Option) {
     return
   }
 
+  //在这里解析值，例如 -es create
+  //实际上键是es 值是es后面跟的内容
+  if option.Es == "create"{
+    EsCreateIndex()
+    return
+  }
+
+  //不要忘记前面的return
   //不符合预期走这里
   sys_flag.Usage()
 }
