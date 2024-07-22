@@ -10,6 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+//json中的omit和select是来自json-filter包的，警告可忽略
 type ArticleModel struct {
 	ID        string `json:"id" structs:"id"`                 // es的id
 	CreatedAt string `json:"createdAt" structs:"created_at"` // 创建时间
@@ -18,7 +19,7 @@ type ArticleModel struct {
 	Title    string `json:"title" structs:"title"`                // 文章标题
 	Keyword  string `json:"keyword" structs:"keyword"` // 关键字
 	Abstract string `json:"abstract" structs:"abstract"`          // 文章简介
-	Content  string `json:"content" structs:"content"` // 文章内容
+	Content  string `json:"content",omit(list) structs:"content"` // 文章内容
 
 	LookCount     int `json:"lookCount" structs:"look_count"`         // 浏览量
 	CommentCount  int `json:"commentCount" structs:"comment_count"`   // 评论量
@@ -175,7 +176,7 @@ func (a ArticleModel) RemoveIndex() error {
 	return nil
 }
 
-// Create 添加的方法
+// Create 添加文章的方法
 func (a *ArticleModel) Create() (err error) {
 	indexResponse, err := global.ESClient.Index().
 		Index(a.Index()).
