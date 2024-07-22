@@ -14,7 +14,8 @@ func (router RouterGroup) ArticleRouter() {
 	   article.POST("create",middleware.JwtAuth(), articleApi.ArticleCreateView)
 	   //获取文章列表
 	   article.GET("list",middleware.JwtAuth(), articleApi.ArticleListView)
-	   article.GET("detail",middleware.JwtAuth(), articleApi.ArticleDetailView)
+	   //获取文章详情
+	   article.GET("detail/:id",middleware.JwtAuth(), articleApi.ArticleDetailView)
 
 	}
    
