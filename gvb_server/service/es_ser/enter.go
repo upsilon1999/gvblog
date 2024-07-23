@@ -3,6 +3,7 @@ package es_ser
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"gvb_server/global"
 	"gvb_server/models"
@@ -86,4 +87,28 @@ func CommDetail(id string) (model models.ArticleModel, err error) {
 	model.ID = res.Id
 	return
   }
+
+//根据keyword，即文章标题获取文章详情
+func CommDetailByKeyword(key string) (model models.ArticleModel, err error) {
+	res, err := global.ESClient.Search().
+	  Index(models.ArticleModel{}.Index()).
+	  Query(elastic.NewTermQuery("keyword", key)).
+	  Size(1).
+	  Do(context.Background())
+	if err != nil {
+	  return
+	}
+	if res.Hits.TotalHits.Value == 0 {
+	  return model, errors.New("文章不存在")
+	}
+	hit := res.Hits.Hits[0]
+  
+	err = json.Unmarshal(hit.Source, &model)
+	if err != nil {
+	  return
+	}
+	model.ID = hit.Id
+	return
+}
+  
   

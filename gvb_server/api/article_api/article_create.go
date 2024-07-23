@@ -107,6 +107,7 @@ func (ArticleApi) ArticleCreateView(c *gin.Context){
 		CreatedAt:    now,
 		UpdatedAt:    now,
 		Title:        cr.Title,
+		Keyword: cr.Title,//这一步是必要的，否则es中keyword就无值
 		Abstract:     cr.Abstract,
 		Content:      cr.Content,
 		UserID:       userID,
@@ -118,6 +119,12 @@ func (ArticleApi) ArticleCreateView(c *gin.Context){
 		BannerID:     cr.BannerID,
 		BannerUrl:    bannerUrl,
 		Tags:         cr.Tags,
+	}
+
+	//在创建es文章数据前，对keyword进行判断
+	if article.ISExistData(){
+		res.FailWithMessage("文章已存在",c)
+		return
 	}
 
 	err = article.Create()

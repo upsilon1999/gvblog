@@ -10,7 +10,8 @@ import (
 type ESIDRequest struct {
 	ID string `json:"id" form:"id" uri:"id"`
 }
-  
+
+//通过es的id来获取数据
 func (ArticleApi) ArticleDetailView(c *gin.Context) {
 	var cr ESIDRequest
 	err := c.ShouldBindUri(&cr)
@@ -25,3 +26,23 @@ func (ArticleApi) ArticleDetailView(c *gin.Context) {
 	}
 	res.OkWithData(model, c)
 }
+
+// 根据keyword，即文章标题获取文章详情
+type ArticleDetailRequest struct {
+	Title string `json:"title" form:"title"`
+  }
+  
+  func (ArticleApi) ArticleDetailByTitleView(c *gin.Context) {
+	var cr ArticleDetailRequest
+	err := c.ShouldBindQuery(&cr)
+	if err != nil {
+	  res.FailWithCode(res.ArgumentError, c)
+	  return
+	}
+	model, err := es_ser.CommDetailByKeyword(cr.Title)
+	if err != nil {
+	  res.FailWithMessage(err.Error(), c)
+	  return
+	}
+	res.OkWithData(model, c)
+  }

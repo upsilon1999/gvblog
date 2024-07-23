@@ -3,9 +3,11 @@ package models
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"gvb_server/global"
 	"gvb_server/models/ctype"
 
+	"github.com/fatih/structs"
 	"github.com/olivere/elastic/v7"
 	"github.com/sirupsen/logrus"
 )
@@ -17,9 +19,9 @@ type ArticleModel struct {
 	UpdatedAt string `json:"updatedAt" structs:"updated_at"` // 更新时间
 
 	Title    string `json:"title" structs:"title"`                // 文章标题
-	Keyword  string `json:"keyword" structs:"keyword"` // 关键字
+	Keyword  string `structs:"keyword" json:"keyword",omit(list)` // 关键字
 	Abstract string `json:"abstract" structs:"abstract"`          // 文章简介
-	Content  string `json:"content",omit(list) structs:"content"` // 文章内容
+	Content  string `structs:"content" json:"content",omit(list)` // 文章内容
 
 	LookCount     int `json:"lookCount" structs:"look_count"`         // 浏览量
 	CommentCount  int `json:"commentCount" structs:"comment_count"`   // 评论量
@@ -178,9 +180,11 @@ func (a ArticleModel) RemoveIndex() error {
 
 // Create 添加文章的方法
 func (a *ArticleModel) Create() (err error) {
+	maps := structs.Map(&a)
+	fmt.Printf("map值为%#v",maps)
 	indexResponse, err := global.ESClient.Index().
 		Index(a.Index()).
-		BodyJson(a).Do(context.Background())
+		BodyJson(maps).Do(context.Background())
 	if err != nil {
 		logrus.Error(err.Error())
 		return err
@@ -191,15 +195,20 @@ func (a *ArticleModel) Create() (err error) {
 
 // ISExistData 是否存在该文章
 func (a ArticleModel) ISExistData() bool {
+	//NewTermQuery(key,value) 精确匹配键值
 	res, err := global.ESClient.
 		Search(a.Index()).
 		Query(elastic.NewTermQuery("keyword", a.Title)).
 		Size(1).
 		Do(context.Background())
+
+	//这里报错，虽然是操作es出错了，但我们也认为是没存在文章
+	//错误根据错误捕捉来人工修改
 	if err != nil {
 		logrus.Error(err.Error())
 		return false
 	}
+	//查询结果
 	if res.Hits.TotalHits.Value > 0 {
 		return true
 	}
