@@ -7,6 +7,7 @@ import (
 	"gvb_server/service/es_ser"
 
 	"github.com/gin-gonic/gin"
+	"github.com/liu-cn/json-filter/filter"
 )
 
 func (ArticleApi) ArticleListView(c *gin.Context) {
@@ -21,5 +22,5 @@ func (ArticleApi) ArticleListView(c *gin.Context) {
 		global.Log.Error(err)
 		res.FailWithMessage("查询失败",c)
 	}
-	res.OkWithList(list,int64(count),c)
+	res.OkWithList(filter.Omit("list", list),int64(count),c)
 }

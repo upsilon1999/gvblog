@@ -12,6 +12,26 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+type Option struct{
+	Page  int    `form:"page"`
+	Key   string `form:"key"`
+	Limit int    `form:"limit"`
+	Sort  string `form:"sort"`
+	Fields []string 
+	Tag string `form:"tag"`
+} 
+func (op Option)GetFrom()int{
+	if op.Limit == 0 {
+		op.Limit = 10
+	}
+	if op.Page == 0 {
+		op.Page = 1
+	}
+	return (op.Page - 1)*op.Limit
+}
+
+
+
 //获取es分页列表数据
 func CommList(key string, page int, limit int)(list []models.ArticleModel,count int,err error){
 	boolSearch := elastic.NewBoolQuery()
@@ -111,4 +131,68 @@ func CommDetailByKeyword(key string) (model models.ArticleModel, err error) {
 	return
 }
   
-  
+
+
+//获取分页并高亮标题
+func CommHighLightList(option Option)(list []models.ArticleModel,count int,err error){
+	boolSearch := elastic.NewBoolQuery()
+
+	if option.Key != "" {
+	  boolSearch.Must(
+		//构造多字段查询
+		elastic.NewMultiMatchQuery(option.Key, option.Fields...),
+	  )
+	}
+
+	//标签搜索
+	if option.Tag != "" {
+		boolSearch.Must(
+			//构造多字段查询
+		  elastic.NewMultiMatchQuery(option.Tag, "tags"),
+		)
+	  }
+	
+	if option.Limit == 0 {
+		option.Limit = 10
+	}
+
+	res, err := global.ESClient.
+    Search(models.ArticleModel{}.Index()).
+    Query(boolSearch).
+	Highlight(elastic.NewHighlight().Field("title")).
+    From(option.GetFrom()).
+    Size(option.Limit).
+    Do(context.Background())
+
+	if err != nil {
+		logrus.Error(err.Error())
+		return nil,0,err
+	}
+
+	count = int(res.Hits.TotalHits.Value) //搜索到结果总条数
+	demoList := []models.ArticleModel{}
+	for _,hit := range res.Hits.Hits{
+		var model models.ArticleModel
+		data,err := hit.Source.MarshalJSON()
+		if err!=nil{
+			logrus.Error(err.Error())
+			continue
+		}
+
+		err = json.Unmarshal(data,&model)
+		if err!=nil{
+			logrus.Error(err)
+			continue
+		}
+
+		
+		if title, ok := hit.Highlight["title"];ok {
+			model.Title = title[0]
+		}
+
+		model.ID = hit.Id 
+		demoList = append(demoList, model)
+	}
+	fmt.Println(demoList,count)
+	return demoList,count,err
+}

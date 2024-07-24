@@ -122,7 +122,7 @@ func (ArticleApi) ArticleCreateView(c *gin.Context){
 	}
 
 	//在创建es文章数据前，对keyword进行判断
-	if article.ISExistData(){
+	if article.ISExistTitle(){
 		res.FailWithMessage("文章已存在",c)
 		return
 	}

@@ -20,6 +20,15 @@ func (router RouterGroup) ArticleRouter() {
 	   article.GET("detail",middleware.JwtAuth(), articleApi.ArticleDetailByTitleView)
 	   //文章日历
 	   article.GET("calendar",middleware.JwtAuth(), articleApi.ArticleCalendarView)
+	   //获取文章标签
+	   article.GET("tags",middleware.JwtAuth(),articleApi.ArticleTagListView)
+	   //文章更新
+	   article.PUT("update",middleware.JwtAuth(), articleApi.ArticleUpdateView)
+	   //文章批量删除
+	   article.DELETE("remove",middleware.JwtAuth(),articleApi.ArticleRemoveView)
+	   //文章列表高亮搜索
+	   article.GET("highlist",middleware.JwtAuth(), articleApi.ArticleHighListView)
+
 	}
    
   }

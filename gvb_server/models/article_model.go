@@ -19,9 +19,9 @@ type ArticleModel struct {
 	UpdatedAt string `json:"updatedAt" structs:"updated_at"` // 更新时间
 
 	Title    string `json:"title" structs:"title"`                // 文章标题
-	Keyword  string `structs:"keyword" json:"keyword",omit(list)` // 关键字
+	Keyword  string `structs:"keyword" json:"keyword,omit(list)"` // 关键字
 	Abstract string `json:"abstract" structs:"abstract"`          // 文章简介
-	Content  string `structs:"content" json:"content",omit(list)` // 文章内容
+	Content  string `structs:"content" json:"content,omit(list)"` // 文章内容
 
 	LookCount     int `json:"lookCount" structs:"look_count"`         // 浏览量
 	CommentCount  int `json:"commentCount" structs:"comment_count"`   // 评论量
@@ -194,7 +194,7 @@ func (a *ArticleModel) Create() (err error) {
 }
 
 // ISExistData 是否存在该文章
-func (a ArticleModel) ISExistData() bool {
+func (a ArticleModel) ISExistTitle() bool {
 	//NewTermQuery(key,value) 精确匹配键值
 	res, err := global.ESClient.
 		Search(a.Index()).
@@ -214,6 +214,19 @@ func (a ArticleModel) ISExistData() bool {
 	}
 	return false
 }
+
+// func (a ArticleModel) ISExistDataById() bool {
+// 	//NewTermQuery(key,value) 精确匹配键值
+// 	_, err := global.ESClient.
+// 		Get().
+// 		Index(a.Index()).
+// 		Id(a.ID).
+// 		Do(context.Background())
+// 	if err != nil {
+// 		return true
+// 	}
+// 	return false
+// }
 func (a *ArticleModel) GetDataByID(id string) error {
 	res, err := global.ESClient.
 		Get().
