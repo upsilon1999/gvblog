@@ -7,7 +7,10 @@ import (
 	"fmt"
 	"gvb_server/global"
 	"gvb_server/models"
+	"strings"
 
+	"github.com/fatih/structs"
+	"github.com/mitchellh/mapstructure"
 	"github.com/olivere/elastic/v7"
 	"github.com/sirupsen/logrus"
 )
@@ -80,11 +83,21 @@ func CommList(key string, page int, limit int)(list []models.ArticleModel,count 
 			continue
 		}
 
-		err = json.Unmarshal(data,&model)
+		//用map来接收es的值
+		maps := structs.Map(&model)
+		err = json.Unmarshal(data,&maps)
 		if err!=nil{
 			logrus.Error(err)
+			continue
 		}
-		model.ID = hit.Id 
+		maps["id"] = hit.Id 
+
+		//转回结构体，以便能使用结构体的json映射变成驼峰
+		err = mapstructure.Decode(maps,&model)
+		if err != nil {
+			logrus.Error(err.Error())
+			continue
+		}
 		demoList = append(demoList, model)
 	}
 	fmt.Println(demoList,count)
@@ -100,11 +113,20 @@ func CommDetail(id string) (model models.ArticleModel, err error) {
 	if err != nil {
 	  return
 	}
-	err = json.Unmarshal(res.Source, &model)
+	
+	maps := structs.Map(&model)
+	err = json.Unmarshal(res.Source, &maps)
 	if err != nil {
+	  logrus.Error(err)
 	  return
 	}
-	model.ID = res.Id
+	maps["id"] = res.Id
+
+	err = mapstructure.Decode(maps,&model)
+	if err != nil {
+		logrus.Error(err.Error())
+		return
+	}
 	return
   }
 
@@ -123,18 +145,98 @@ func CommDetailByKeyword(key string) (model models.ArticleModel, err error) {
 	}
 	hit := res.Hits.Hits[0]
   
-	err = json.Unmarshal(hit.Source, &model)
+	maps := structs.Map(&model)
+	err = json.Unmarshal(hit.Source, &maps)
 	if err != nil {
+	  logrus.Error(err)
 	  return
 	}
-	model.ID = hit.Id
+	maps["id"] = hit.Id
+
+	err = mapstructure.Decode(maps,&model)
+	if err != nil {
+		logrus.Error(err.Error())
+		return
+	}
 	return
 }
   
 
 
-//获取分页并高亮标题
-func CommHighLightList(option Option)(list []models.ArticleModel,count int,err error){
+//获取分页并高亮多个字段
+func CommHighLightList(key string, page int, limit int)(list []models.ArticleModel,count int,err error){
+	boolSearch := elastic.NewBoolQuery()
+	from := page
+	if key != "" {
+	  boolSearch.Must(
+		//构造多字段查询
+		elastic.NewMultiMatchQuery(key, "title", "abstract"),
+	  )
+	}
+	if limit == 0 {
+	  limit = 10
+	}
+	if from == 0 {
+	  from = 1
+	}
+
+
+	var title = elastic.NewHighlighterField("title")
+	var abstract = elastic.NewHighlighterField("abstract")
+	res, err := global.ESClient.
+    Search(models.ArticleModel{}.Index()).
+    Query(boolSearch).
+	Highlight(elastic.NewHighlight().Fields(title,abstract)).
+    From((from - 1) * limit).
+    Size(limit).
+    Do(context.Background())
+
+	if err != nil {
+		logrus.Error(err.Error())
+		return nil,0,err
+	}
+
+	count = int(res.Hits.TotalHits.Value) //搜索到结果总条数
+	demoList := []models.ArticleModel{}
+	for _,hit := range res.Hits.Hits{
+		var model models.ArticleModel
+		data,err := hit.Source.MarshalJSON()
+		if err!=nil{
+			logrus.Error(err.Error())
+			continue
+		}
+		maps := structs.Map(&model)
+		err = json.Unmarshal(data, &maps)
+		if err != nil {
+			logrus.Error(err)
+			continue
+		}
+
+		err = mapstructure.Decode(maps,&model)
+		if err != nil {
+			logrus.Error(err.Error())
+			continue
+		}
+
+		//要高亮哪些字段就在这里添加
+		//只有在这里添加的才会返回到前端
+		if title, ok := hit.Highlight["title"];ok {
+			model.Title = title[0]
+		}
+		if abstract, ok := hit.Highlight["abstract"];ok {
+			model.Abstract = abstract[0]
+		}
+
+
+		model.ID = hit.Id 
+		demoList = append(demoList, model)
+	}
+	fmt.Println(demoList,count)
+	return demoList,count,err
+}
+
+//分页搜索，但仅高亮标题
+func CommHighTitileList(option Option)(list []models.ArticleModel,count int,err error){
 	boolSearch := elastic.NewBoolQuery()
 
 	if option.Key != "" {
@@ -150,16 +252,60 @@ func CommHighLightList(option Option)(list []models.ArticleModel,count int,err e
 			//构造多字段查询
 		  elastic.NewMultiMatchQuery(option.Tag, "tags"),
 		)
-	  }
+	}
 	
-	if option.Limit == 0 {
-		option.Limit = 10
+	//排序相关操作
+	//该结构体的来源是Sort需要的参数类型
+	type SortField struct{
+		//按照哪个字段排序
+		Field string
+		//排序方式
+		Ascending bool
+	}
+	//构造默认值
+	sortField := SortField{
+		Field: "created_at",
+		//true是升序，即从小到大 
+		//false是降序，即从大到小
+		Ascending: false, 
 	}
 
+	/*
+		当前端传递了排序时，由于sort的格式为
+
+		字段名:排序方式
+
+		例如:created_at:desc
+	*/
+	if option.Sort != "" {
+		_list := strings.Split(option.Sort, ":")
+		if len(_list) == 2 && (_list[1] == "desc" || _list[1] == "asc") {
+		  sortField.Field = _list[0]
+		  //desc降序
+		  if _list[1] == "desc" {
+			sortField.Ascending = false
+		  }
+		  //asc升序
+		  if _list[1] == "asc" {
+			sortField.Ascending = true
+		  }
+		}
+	}
+
+	fmt.Printf("接收到的数据为%#v\n",option)
+
+	// Sort(sortField.Field, sortField.Ascending).
+	if option.Limit == 0{
+		option.Limit=10
+	}
+
+	//Highlight加入高亮搜索
+	//Sort加入排序搜索
 	res, err := global.ESClient.
     Search(models.ArticleModel{}.Index()).
     Query(boolSearch).
 	Highlight(elastic.NewHighlight().Field("title")).
+	Sort(sortField.Field, sortField.Ascending).
     From(option.GetFrom()).
     Size(option.Limit).
     Do(context.Background())
@@ -178,14 +324,21 @@ func CommHighLightList(option Option)(list []models.ArticleModel,count int,err e
 			logrus.Error(err.Error())
 			continue
 		}
-
-		err = json.Unmarshal(data,&model)
-		if err!=nil{
+		
+		maps := structs.Map(&model)
+		err = json.Unmarshal(data, &maps)
+		if err != nil {
 			logrus.Error(err)
 			continue
 		}
 
-		
+		err = mapstructure.Decode(maps,&model)
+		if err != nil {
+			logrus.Error(err.Error())
+			continue
+		}
+
+		// fmt.Printf("每条数据为%#v\n",model)
 		if title, ok := hit.Highlight["title"];ok {
 			model.Title = title[0]
 		}

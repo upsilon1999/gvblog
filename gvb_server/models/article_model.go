@@ -14,32 +14,32 @@ import (
 
 //json中的omit和select是来自json-filter包的，警告可忽略
 type ArticleModel struct {
-	ID        string `json:"id" structs:"id"`                 // es的id
-	CreatedAt string `json:"createdAt" structs:"created_at"` // 创建时间
-	UpdatedAt string `json:"updatedAt" structs:"updated_at"` // 更新时间
+	ID        string `json:"id" structs:"id" mapstructure:"id"`                 // es的id
+	CreatedAt string `json:"createdAt" structs:"created_at" mapstructure:"created_at"` // 创建时间
+	UpdatedAt string `json:"updatedAt" structs:"updated_at" mapstructure:"updated_at"` // 更新时间
 
-	Title    string `json:"title" structs:"title"`                // 文章标题
-	Keyword  string `structs:"keyword" json:"keyword,omit(list)"` // 关键字
-	Abstract string `json:"abstract" structs:"abstract"`          // 文章简介
-	Content  string `structs:"content" json:"content,omit(list)"` // 文章内容
+	Title    string `json:"title" structs:"title" mapstructure:"title"`                // 文章标题
+	Keyword  string `structs:"keyword" mapstructure:"keyword" json:"keyword,omit(list)"` // 关键字
+	Abstract string `json:"abstract" mapstructure:"abstract" structs:"abstract"`          // 文章简介
+	Content  string `structs:"content" mapstructure:"content" json:"content,omit(list)"` // 文章内容
 
-	LookCount     int `json:"lookCount" structs:"look_count"`         // 浏览量
-	CommentCount  int `json:"commentCount" structs:"comment_count"`   // 评论量
-	DiggCount     int `json:"diggCount" structs:"digg_count"`         // 点赞量
-	CollectsCount int `json:"collectsCount" structs:"collects_count"` // 收藏量
+	LookCount     int `json:"lookCount" structs:"look_count" mapstructure:"look_count"`         // 浏览量
+	CommentCount  int `json:"commentCount" structs:"comment_count"  mapstructure:"comment_count"`   // 评论量
+	DiggCount     int `json:"diggCount" structs:"digg_count" mapstructure:"digg_count"`         // 点赞量
+	CollectsCount int `json:"collectsCount" structs:"collects_count" mapstructure:"collects_count"` // 收藏量
 
-	UserID       uint   `json:"userId" structs:"user_id"`               // 用户id
-	UserNickName string `json:"userNickName" structs:"user_nick_name"` //用户昵称
-	UserAvatar   string `json:"userAvatar" structs:"user_avatar"`       // 用户头像
+	UserID       uint   `json:"userId" structs:"user_id" mapstructure:"user_id"`               // 用户id
+	UserNickName string `json:"userNickName" structs:"user_nick_name" mapstructure:"user_nick_name"` //用户昵称
+	UserAvatar   string `json:"userAvatar" structs:"user_avatar" mapstructure:"user_avatar"`       // 用户头像
 
-	Category string `json:"category" structs:"category"`        // 文章分类
-	Source   string `json:"source" structs:"source"` // 文章来源
-	Link     string `json:"link" structs:"link"`     // 原文链接
+	Category string `json:"category" structs:"category" mapstructure:"category"`        // 文章分类
+	Source   string `json:"source" structs:"source" mapstructure:"source"` // 文章来源
+	Link     string `json:"link" structs:"link" mapstructure:"link"`     // 原文链接
 
-	BannerID  uint   `json:"bannerId" structs:"banner_id"`   // 文章封面id
-	BannerUrl string `json:"bannerUrl" structs:"banner_url"` // 文章封面
+	BannerID  uint   `json:"bannerId" structs:"banner_id" mapstructure:"banner_id"`   // 文章封面id
+	BannerUrl string `json:"bannerUrl" structs:"banner_url" mapstructure:"banner_url"` // 文章封面
 
-	Tags ctype.Array `json:"tags" structs:"tags"` // 文章标签
+	Tags ctype.Array `json:"tags" structs:"tags" mapstructure:"tags"` // 文章标签
 }
 
 func (ArticleModel) Index() string {

@@ -28,7 +28,8 @@ func (router RouterGroup) ArticleRouter() {
 	   article.DELETE("remove",middleware.JwtAuth(),articleApi.ArticleRemoveView)
 	   //文章列表高亮搜索
 	   article.GET("highlist",middleware.JwtAuth(), articleApi.ArticleHighListView)
-
+	   //支持标题、内容简介、内容搜索，标签搜索、排序搜索、分页搜索，但是只高亮标题
+	   article.GET("hiagTitle",middleware.JwtAuth(),articleApi.ArticleHighTitleView)
 	}
    
   }
