@@ -56,7 +56,7 @@ func (ArticleApi) ArticleHighTitleView(c *gin.Context) {
 		Limit: cr.Limit,
 		Key: cr.Key,
 		Sort: cr.Sort,
-		Fields: []string{"title","abstract","content"},
+		Fields: []string{"title","abstract"},
 		Tag: cr.Tag,
 	})
 	if err != nil{

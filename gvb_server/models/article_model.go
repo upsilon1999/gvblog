@@ -3,11 +3,9 @@ package models
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"gvb_server/global"
 	"gvb_server/models/ctype"
 
-	"github.com/fatih/structs"
 	"github.com/olivere/elastic/v7"
 	"github.com/sirupsen/logrus"
 )
@@ -57,36 +55,42 @@ func (ArticleModel) Mapping() string {
   "mappings": {
     "properties": {
       "title": { 
-        "type": "text"
+        "type": "text",
+		"analyzer": "ik_max_word",
+		"search_analyzer": "ik_smart"
       },
       "keyword": { 
         "type": "keyword"
       },
       "abstract": { 
-        "type": "text"
+        "type": "text",
+		"analyzer": "ik_max_word",
+		"search_analyzer": "ik_smart"
       },
       "content": { 
-        "type": "text"
+        "type": "text",
+		"analyzer": "ik_max_word",
+		"search_analyzer": "ik_smart"
       },
-      "look_count": {
+      "lookCount": {
         "type": "integer"
       },
-      "comment_count": {
+      "commentCount": {
         "type": "integer"
       },
       "digg_count": {
         "type": "integer"
       },
-      "collects_count": {
+      "collectsCount": {
         "type": "integer"
       },
-      "user_id": {
+      "userId": {
         "type": "integer"
       },
-      "user_nick_name": { 
+      "userNickName": { 
         "type": "keyword"
       },
-      "user_avatar": { 
+      "userAvatar": { 
         "type": "keyword"
       },
       "category": { 
@@ -98,21 +102,21 @@ func (ArticleModel) Mapping() string {
       "link": { 
         "type": "keyword"
       },
-      "banner_id": {
+      "bannerId": {
         "type": "integer"
       },
-      "banner_url": { 
+      "bannerUrl": { 
         "type": "keyword"
       },
       "tags": { 
         "type": "keyword"
       },
-      "created_at":{
+      "createdAt":{
         "type": "date",
         "null_value": "null",
         "format": "[yyyy-MM-dd HH:mm:ss]"
       },
-      "updated_at":{
+      "updatedAt":{
         "type": "date",
         "null_value": "null",
         "format": "[yyyy-MM-dd HH:mm:ss]"
@@ -180,11 +184,9 @@ func (a ArticleModel) RemoveIndex() error {
 
 // Create 添加文章的方法
 func (a *ArticleModel) Create() (err error) {
-	maps := structs.Map(&a)
-	fmt.Printf("map值为%#v",maps)
 	indexResponse, err := global.ESClient.Index().
 		Index(a.Index()).
-		BodyJson(maps).Do(context.Background())
+		BodyJson(a).Do(context.Background())
 	if err != nil {
 		logrus.Error(err.Error())
 		return err

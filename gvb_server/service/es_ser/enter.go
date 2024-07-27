@@ -4,13 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"gvb_server/global"
 	"gvb_server/models"
 	"strings"
 
-	"github.com/fatih/structs"
-	"github.com/mitchellh/mapstructure"
 	"github.com/olivere/elastic/v7"
 	"github.com/sirupsen/logrus"
 )
@@ -83,24 +80,15 @@ func CommList(key string, page int, limit int)(list []models.ArticleModel,count 
 			continue
 		}
 
-		//用map来接收es的值
-		maps := structs.Map(&model)
-		err = json.Unmarshal(data,&maps)
+		err = json.Unmarshal(data,&model)
 		if err!=nil{
 			logrus.Error(err)
 			continue
 		}
-		maps["id"] = hit.Id 
-
-		//转回结构体，以便能使用结构体的json映射变成驼峰
-		err = mapstructure.Decode(maps,&model)
-		if err != nil {
-			logrus.Error(err.Error())
-			continue
-		}
+		model.ID = hit.Id 
 		demoList = append(demoList, model)
 	}
-	fmt.Println(demoList,count)
+	// fmt.Println(demoList,count)
 	return demoList,count,err
 }
 
@@ -114,19 +102,12 @@ func CommDetail(id string) (model models.ArticleModel, err error) {
 	  return
 	}
 	
-	maps := structs.Map(&model)
-	err = json.Unmarshal(res.Source, &maps)
+	err = json.Unmarshal(res.Source, &model)
 	if err != nil {
 	  logrus.Error(err)
 	  return
 	}
-	maps["id"] = res.Id
-
-	err = mapstructure.Decode(maps,&model)
-	if err != nil {
-		logrus.Error(err.Error())
-		return
-	}
+	model.ID= res.Id
 	return
   }
 
@@ -145,19 +126,12 @@ func CommDetailByKeyword(key string) (model models.ArticleModel, err error) {
 	}
 	hit := res.Hits.Hits[0]
   
-	maps := structs.Map(&model)
-	err = json.Unmarshal(hit.Source, &maps)
+	err = json.Unmarshal(hit.Source, &model)
 	if err != nil {
 	  logrus.Error(err)
 	  return
 	}
-	maps["id"] = hit.Id
-
-	err = mapstructure.Decode(maps,&model)
-	if err != nil {
-		logrus.Error(err.Error())
-		return
-	}
+	model.ID = hit.Id
 	return
 }
   
@@ -205,19 +179,12 @@ func CommHighLightList(key string, page int, limit int)(list []models.ArticleMod
 			logrus.Error(err.Error())
 			continue
 		}
-		maps := structs.Map(&model)
-		err = json.Unmarshal(data, &maps)
+		
+		err = json.Unmarshal(data, &model)
 		if err != nil {
 			logrus.Error(err)
 			continue
 		}
-
-		err = mapstructure.Decode(maps,&model)
-		if err != nil {
-			logrus.Error(err.Error())
-			continue
-		}
-
 		//要高亮哪些字段就在这里添加
 		//只有在这里添加的才会返回到前端
 		if title, ok := hit.Highlight["title"];ok {
@@ -231,7 +198,7 @@ func CommHighLightList(key string, page int, limit int)(list []models.ArticleMod
 		model.ID = hit.Id 
 		demoList = append(demoList, model)
 	}
-	fmt.Println(demoList,count)
+	// fmt.Println(demoList,count)
 	return demoList,count,err
 }
 
@@ -292,7 +259,7 @@ func CommHighTitileList(option Option)(list []models.ArticleModel,count int,err 
 		}
 	}
 
-	fmt.Printf("接收到的数据为%#v\n",option)
+	// fmt.Printf("接收到的数据为%#v\n",option)
 
 	// Sort(sortField.Field, sortField.Ascending).
 	if option.Limit == 0{
@@ -325,19 +292,11 @@ func CommHighTitileList(option Option)(list []models.ArticleModel,count int,err 
 			continue
 		}
 		
-		maps := structs.Map(&model)
-		err = json.Unmarshal(data, &maps)
+		err = json.Unmarshal(data, &model)
 		if err != nil {
 			logrus.Error(err)
 			continue
 		}
-
-		err = mapstructure.Decode(maps,&model)
-		if err != nil {
-			logrus.Error(err.Error())
-			continue
-		}
-
 		// fmt.Printf("每条数据为%#v\n",model)
 		if title, ok := hit.Highlight["title"];ok {
 			model.Title = title[0]
@@ -346,6 +305,6 @@ func CommHighTitileList(option Option)(list []models.ArticleModel,count int,err 
 		model.ID = hit.Id 
 		demoList = append(demoList, model)
 	}
-	fmt.Println(demoList,count)
+	// fmt.Println(demoList,count)
 	return demoList,count,err
 }
