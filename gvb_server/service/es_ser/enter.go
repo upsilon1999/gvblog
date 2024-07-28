@@ -6,6 +6,7 @@ import (
 	"errors"
 	"gvb_server/global"
 	"gvb_server/models"
+	"gvb_server/service/redis_ser"
 	"strings"
 
 	"github.com/olivere/elastic/v7"
@@ -72,6 +73,10 @@ func CommList(key string, page int, limit int)(list []models.ArticleModel,count 
 
 	count = int(res.Hits.TotalHits.Value) //搜索到结果总条数
 	demoList := []models.ArticleModel{}
+	//获取文章点赞数据
+	upvoteInfo := redis_ser.GetUpvoteInfo()
+	//获取文章浏览数
+	lookInfo := redis_ser.GetLookInfo()
 	for _,hit := range res.Hits.Hits{
 		var model models.ArticleModel
 		data,err := hit.Source.MarshalJSON()
@@ -86,6 +91,11 @@ func CommList(key string, page int, limit int)(list []models.ArticleModel,count 
 			continue
 		}
 		model.ID = hit.Id 
+		//同步每一条的点赞数据
+		upvote := upvoteInfo[hit.Id]
+		look := lookInfo[hit.Id]
+		model.UpvoteCount += upvote
+		model.LookCount+=look
 		demoList = append(demoList, model)
 	}
 	// fmt.Println(demoList,count)
@@ -108,6 +118,8 @@ func CommDetail(id string) (model models.ArticleModel, err error) {
 	  return
 	}
 	model.ID= res.Id
+	//同步浏览量
+	model.LookCount += redis_ser.GetLook(res.Id)
 	return
   }
 
@@ -132,6 +144,7 @@ func CommDetailByKeyword(key string) (model models.ArticleModel, err error) {
 	  return
 	}
 	model.ID = hit.Id
+	model.LookCount += redis_ser.GetLook(hit.Id)
 	return
 }
   
@@ -172,6 +185,10 @@ func CommHighLightList(key string, page int, limit int)(list []models.ArticleMod
 
 	count = int(res.Hits.TotalHits.Value) //搜索到结果总条数
 	demoList := []models.ArticleModel{}
+	//获取文章点赞数据
+	upvoteInfo := redis_ser.GetUpvoteInfo()
+	//获取文章浏览数
+	lookInfo := redis_ser.GetLookInfo()
 	for _,hit := range res.Hits.Hits{
 		var model models.ArticleModel
 		data,err := hit.Source.MarshalJSON()
@@ -196,6 +213,12 @@ func CommHighLightList(key string, page int, limit int)(list []models.ArticleMod
 
 
 		model.ID = hit.Id 
+		//同步每一条的点赞数据
+		upvote := upvoteInfo[hit.Id]
+		//同步浏览数
+		look := lookInfo[hit.Id]
+		model.UpvoteCount += upvote
+		model.LookCount+=look
 		demoList = append(demoList, model)
 	}
 	// fmt.Println(demoList,count)
@@ -284,6 +307,12 @@ func CommHighTitileList(option Option)(list []models.ArticleModel,count int,err 
 
 	count = int(res.Hits.TotalHits.Value) //搜索到结果总条数
 	demoList := []models.ArticleModel{}
+
+	//获取文章点赞数据
+	upvoteInfo := redis_ser.GetUpvoteInfo()
+
+	//获取文章浏览数
+	lookInfo := redis_ser.GetLookInfo()
 	for _,hit := range res.Hits.Hits{
 		var model models.ArticleModel
 		data,err := hit.Source.MarshalJSON()
@@ -303,6 +332,13 @@ func CommHighTitileList(option Option)(list []models.ArticleModel,count int,err 
 		}
 
 		model.ID = hit.Id 
+
+		//同步每一条的点赞数据
+		upvote := upvoteInfo[hit.Id]
+		look := lookInfo[hit.Id]
+		model.UpvoteCount += upvote
+		model.LookCount+=look
+
 		demoList = append(demoList, model)
 	}
 	// fmt.Println(demoList,count)

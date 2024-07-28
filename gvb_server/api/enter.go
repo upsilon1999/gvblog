@@ -8,6 +8,7 @@ import (
 	"gvb_server/api/message_api"
 	"gvb_server/api/settings_api"
 	"gvb_server/api/tag_api"
+	"gvb_server/api/upvote_api"
 	"gvb_server/api/user_api"
 )
 
@@ -20,6 +21,7 @@ type ApiGroup struct {
 	TagApi tag_api.TagApi
 	MessageApi message_api.MessageApi
 	ArticleApi article_api.ArticleApi
+	UpvoteApi upvote_api.UpvoteApi
 }
 
 var ApiGroupApp = new(ApiGroup)

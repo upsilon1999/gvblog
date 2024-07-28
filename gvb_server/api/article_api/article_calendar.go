@@ -40,7 +40,7 @@ var DateCount = map[string]int{}
 func (ArticleApi) ArticleCalendarView(c *gin.Context) {
 
 	// 时间聚合
-	agg := elastic.NewDateHistogramAggregation().Field("created_at").CalendarInterval("day")
+	agg := elastic.NewDateHistogramAggregation().Field("createdAt").CalendarInterval("day")
   
 	// 时间段搜索
 	// 从今天开始，到去年的今天
@@ -52,7 +52,7 @@ func (ArticleApi) ArticleCalendarView(c *gin.Context) {
 	format := "2006-01-02 15:04:05"
 	// lt 小于  gt 大于
 	//时间使用format的原因是因为我们存入的created_at也使用了格式化，为了方便比较，应该格式化为同一格式
-	query := elastic.NewRangeQuery("created_at").
+	query := elastic.NewRangeQuery("createdAt").
 	  Gte(aYearAgo.Format(format)).
 	  Lte(now.Format(format))
   

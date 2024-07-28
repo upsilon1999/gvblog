@@ -23,7 +23,7 @@ type ArticleModel struct {
 
 	LookCount     int `json:"lookCount" structs:"look_count" mapstructure:"look_count"`         // 浏览量
 	CommentCount  int `json:"commentCount" structs:"comment_count"  mapstructure:"comment_count"`   // 评论量
-	DiggCount     int `json:"diggCount" structs:"digg_count" mapstructure:"digg_count"`         // 点赞量
+	UpvoteCount     int `json:"upvoteCount" structs:"upvote_count" mapstructure:"upvote_count"`         // 点赞量
 	CollectsCount int `json:"collectsCount" structs:"collects_count" mapstructure:"collects_count"` // 收藏量
 
 	UserID       uint   `json:"userId" structs:"user_id" mapstructure:"user_id"`               // 用户id
@@ -78,7 +78,7 @@ func (ArticleModel) Mapping() string {
       "commentCount": {
         "type": "integer"
       },
-      "digg_count": {
+      "upvoteCount": {
         "type": "integer"
       },
       "collectsCount": {

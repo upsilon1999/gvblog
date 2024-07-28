@@ -29,5 +29,6 @@ func InitRouter() *gin.Engine {
 	routerGroupApp.TagRouter()
 	routerGroupApp.MsgRouter()
 	routerGroupApp.ArticleRouter()
+	routerGroupApp.UpvoteRouter()
 	return router
 }
