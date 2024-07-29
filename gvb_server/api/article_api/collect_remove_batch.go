@@ -59,7 +59,7 @@ func (ArticleApi) ArticleCollBatchRemoveView(c *gin.Context) {
 		}
 		count := article.CollectsCount - 1
 		err = es_ser.ArticleUpdate(hit.Id, map[string]any{
-			"collects_count": count,
+			"collectsCount": count,
 		})
 		if err != nil {
 			global.Log.Error(err)
