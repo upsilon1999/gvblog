@@ -25,11 +25,22 @@ func ComList[T any](model T, option Option) (list []T, count int64, err error) {
 
 	query := DB.Where(model)
 
-	count = query.Select("id").Find(&list).RowsAffected
+	/*
 	//由于Select("id")的影响，query变成了只有id一列，我们有两种解决方案
 	//1.将Select("id")去掉，相当于select *
 	//2.再次给query赋值，相当于复位
+	count = query.Select("id").Find(&list).RowsAffected
 	query = DB.Where(model)
+	*/
+	count = query.Find(&list).RowsAffected
+	//设置默认值
+	//因为新版的gorm不传默认为0
+	if option.Page == 0{
+		option.Page =1
+	}
+	if option.Limit ==0{
+		option.Limit = 10
+	}
 	offset := (option.Page - 1) * option.Limit
 	if offset < 0 {
 		offset = 0

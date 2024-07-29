@@ -30,6 +30,13 @@ func (router RouterGroup) ArticleRouter() {
 	   article.GET("highlist",middleware.JwtAuth(), articleApi.ArticleHighListView)
 	   //支持标题、内容简介、内容搜索，标签搜索、排序搜索、分页搜索，但是只高亮标题
 	   article.GET("hiagTitle",middleware.JwtAuth(),articleApi.ArticleHighTitleView)
+	   //收藏文章,或者取消收藏
+	   article.POST("collect",middleware.JwtAuth(),articleApi.ArticleCollCreateView)
+	   //获取用户的收藏列表
+	   article.GET("collectList",middleware.JwtAuth(),articleApi.ArticleCollListView)
+	   //通过id列表删除收藏数据
+	   article.DELETE("collect",middleware.JwtAuth(),articleApi.ArticleCollBatchRemoveView)
+
 	}
    
   }

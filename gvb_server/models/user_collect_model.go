@@ -4,8 +4,9 @@ import "time"
 
 // UserCollectModel 自定义第三张表  记录用户什么时候收藏了什么文章
 type UserCollectModel struct {
-	UserID    uint      `gorm:"primaryKey"`
-	UserModel UserModel `gorm:"foreignKey:UserID"`
-	ArticleID string    `gorm:"size:32"`
-	CreatedAt time.Time
+	ID        uint      `gorm:"primaryKey"`
+	UserID    uint      //用户id
+	UserModel UserModel `gorm:"foreignKey:UserID"`//关联用户表
+	ArticleID string    `gorm:"size:32"`//文章id
+	CreatedAt time.Time	//收藏时间
 }

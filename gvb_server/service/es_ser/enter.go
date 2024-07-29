@@ -344,3 +344,14 @@ func CommHighTitileList(option Option)(list []models.ArticleModel,count int,err 
 	// fmt.Println(demoList,count)
 	return demoList,count,err
 }
+
+//更新记录
+func ArticleUpdate(id string,data map[string]any)error{
+	_,err := global.ESClient.
+	Update().
+	Index(models.ArticleModel{}.Index()).
+	Id(id).
+	Doc(data).
+	Do(context.Background())
+	return err
+}

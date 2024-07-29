@@ -21,6 +21,7 @@ func Makemigrations() {
       &models.CommentModel{},
       &models.ArticleModel{},
       &models.MenuModel{},
+      &models.UserCollectModel{},
       &models.MenuBannerModel{},
       &models.FadeBackModel{},
       &models.LoginDataModel{},
