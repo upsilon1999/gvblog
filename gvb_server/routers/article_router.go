@@ -36,6 +36,8 @@ func (router RouterGroup) ArticleRouter() {
 	   article.GET("collectList",middleware.JwtAuth(),articleApi.ArticleCollListView)
 	   //通过id列表删除收藏数据
 	   article.DELETE("collect",middleware.JwtAuth(),articleApi.ArticleCollBatchRemoveView)
+	   //全文搜索
+	   article.GET("fullText",middleware.JwtAuth(),articleApi.FullTextSearchView)
 
 	}
    
