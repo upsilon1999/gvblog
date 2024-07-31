@@ -4,6 +4,7 @@ import (
 	"gvb_server/global"
 	"gvb_server/models"
 	"gvb_server/models/res"
+	"gvb_server/service/es_ser"
 	jwts "gvb_server/utils/jwt"
 	"strings"
 	"time"
@@ -133,5 +134,9 @@ func (ArticleApi) ArticleCreateView(c *gin.Context){
 		res.FailWithMessage(err.Error(), c)
 		return
 	}
+
+
+	//在创建文章时使用协程创建全文搜索
+	go es_ser.AysncFullText(article.ID,article.Title,article.Content)
 	res.OkWithMessage("文章发布成功", c)
 }
