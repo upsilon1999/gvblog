@@ -57,6 +57,8 @@ func CommList(key string, page int, limit int)(list []models.ArticleModel,count 
 	upvoteInfo := redis_ser.GetUpvoteInfo()
 	//获取文章浏览数
 	lookInfo := redis_ser.GetLookInfo()
+	//获取文章的评论数
+	commentInfo := redis_ser.GetCommentInfo()
 	for _,hit := range res.Hits.Hits{
 		var model models.ArticleModel
 		data,err := hit.Source.MarshalJSON()
@@ -73,9 +75,13 @@ func CommList(key string, page int, limit int)(list []models.ArticleModel,count 
 		model.ID = hit.Id 
 		//同步每一条的点赞数据
 		upvote := upvoteInfo[hit.Id]
+		//同步每一条浏览量
 		look := lookInfo[hit.Id]
+		//同步每一条的评论数
+		comment := commentInfo[hit.Id]
 		model.UpvoteCount += upvote
 		model.LookCount+=look
+		model.CommentCount+=comment
 		demoList = append(demoList, model)
 	}
 	// fmt.Println(demoList,count)
@@ -98,8 +104,12 @@ func CommDetail(id string) (model models.ArticleModel, err error) {
 	  return
 	}
 	model.ID= res.Id
+	//同步点赞数
+	model.UpvoteCount+=redis_ser.GetUpvote(res.Id)
 	//同步浏览量
 	model.LookCount += redis_ser.GetLook(res.Id)
+	//同步评论数
+	model.CommentCount+=redis_ser.GetComment(res.Id)
 	return
   }
 
@@ -124,7 +134,12 @@ func CommDetailByKeyword(key string) (model models.ArticleModel, err error) {
 	  return
 	}
 	model.ID = hit.Id
+	//同步点赞数
+	model.UpvoteCount+=redis_ser.GetUpvote(hit.Id)
+	//同步浏览量
 	model.LookCount += redis_ser.GetLook(hit.Id)
+	//同步评论数
+	model.CommentCount+=redis_ser.GetComment(hit.Id)
 	return
 }
   
@@ -169,6 +184,8 @@ func CommHighLightList(key string, page int, limit int)(list []models.ArticleMod
 	upvoteInfo := redis_ser.GetUpvoteInfo()
 	//获取文章浏览数
 	lookInfo := redis_ser.GetLookInfo()
+	//获取文章的评论数
+	commentInfo := redis_ser.GetCommentInfo()
 	for _,hit := range res.Hits.Hits{
 		var model models.ArticleModel
 		data,err := hit.Source.MarshalJSON()
@@ -197,8 +214,11 @@ func CommHighLightList(key string, page int, limit int)(list []models.ArticleMod
 		upvote := upvoteInfo[hit.Id]
 		//同步浏览数
 		look := lookInfo[hit.Id]
+		//同步评论数
+		comment := commentInfo[hit.Id]
 		model.UpvoteCount += upvote
 		model.LookCount+=look
+		model.CommentCount+=comment
 		demoList = append(demoList, model)
 	}
 	// fmt.Println(demoList,count)
@@ -290,9 +310,10 @@ func CommHighTitileList(option Option)(list []models.ArticleModel,count int,err 
 
 	//获取文章点赞数据
 	upvoteInfo := redis_ser.GetUpvoteInfo()
-
 	//获取文章浏览数
 	lookInfo := redis_ser.GetLookInfo()
+	//获取文章的评论数
+	commentInfo := redis_ser.GetCommentInfo()
 	for _,hit := range res.Hits.Hits{
 		var model models.ArticleModel
 		data,err := hit.Source.MarshalJSON()
@@ -314,10 +335,15 @@ func CommHighTitileList(option Option)(list []models.ArticleModel,count int,err 
 		model.ID = hit.Id 
 
 		//同步每一条的点赞数据
+		//同步每一条的点赞数据
 		upvote := upvoteInfo[hit.Id]
+		//同步浏览数
 		look := lookInfo[hit.Id]
+		//同步评论数
+		comment := commentInfo[hit.Id]
 		model.UpvoteCount += upvote
 		model.LookCount+=look
+		model.CommentCount+=comment
 
 		demoList = append(demoList, model)
 	}
