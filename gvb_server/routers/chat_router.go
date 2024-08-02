@@ -11,6 +11,10 @@ func (router RouterGroup) ChatRouter() {
 	{
 	   //测试webscoket
 	   chat.GET("baseConnect", chatApi.ChatBaseView)
+	   //群聊接口，头像昵称随机生成
+	   chat.GET("randGroup",chatApi.ChatGroupRandView)
+	   //获取聊天记录
+	   chat.GET("groupRecords",chatApi.ChatRandListView)
 	}
    
   }
