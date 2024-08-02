@@ -3,6 +3,7 @@ package api
 import (
 	"gvb_server/api/advert_api"
 	"gvb_server/api/article_api"
+	"gvb_server/api/chat_api"
 	"gvb_server/api/comment_api"
 	"gvb_server/api/images_api"
 	"gvb_server/api/menu_api"
@@ -26,6 +27,7 @@ type ApiGroup struct {
 	UpvoteApi upvote_api.UpvoteApi
 	CommentApi comment_api.CommentApi
 	NewsApi news_api.NewsApi
+	ChatApi chat_api.ChatApi
 }
 
 var ApiGroupApp = new(ApiGroup)
