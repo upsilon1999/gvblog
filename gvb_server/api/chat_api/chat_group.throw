@@ -1,0 +1,130 @@
+package chat_api
+
+import (
+	"encoding/json"
+	"fmt"
+	"gvb_server/models/res"
+	"net/http"
+	"strings"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
+	"github.com/sirupsen/logrus"
+)
+
+//存储所有的群聊信息
+var ConnGroupMap = map[string]*websocket.Conn{}
+
+type MsgType int
+
+//发送的消息类型
+const (
+  //文字消息
+  TextMsg    MsgType = 1
+  //图片消息
+  ImageMsg   MsgType = 2
+  //系统消息
+  SystemMsg  MsgType = 3
+  //进入聊天室消息
+  InRoomMsg  MsgType = 4
+  //离开聊天室消息
+  OutRoomMsg MsgType = 5
+)
+
+type GroupRequest struct {
+  NickName string  `json:"nickName"` // 前端自己生成
+  Avatar   string  `json:"avatar"`    // 头像
+  Content  string  `json:"content"`   // 聊天的内容
+  MsgType  MsgType `json:"msgType"`  // 聊天类型
+}
+
+
+type GroupResponse struct {
+  GroupRequest
+  Date time.Time `json:"date"` // 消息的时间
+}
+
+
+//群聊功能的搭建
+func (ChatApi) ChatGroupView(c *gin.Context) {
+  var upGrader = websocket.Upgrader{
+    CheckOrigin: func(r *http.Request) bool {
+      // 鉴权 true表示放行，false表示拦截
+      return true
+    },
+  }
+  // 将http升级至websocket
+  conn, err := upGrader.Upgrade(c.Writer, c.Request, nil)
+  if err != nil {
+    res.FailWithCode(res.ArgumentError, c)
+    return
+  }
+
+  //连接成功的地址提示
+  addr := conn.RemoteAddr().String()
+  ConnGroupMap[addr] = conn
+  logrus.Infof("%s 连接成功", addr)
+
+
+  //死循环,一直监听
+  for {
+    
+	//接收到消息
+	// 消息类型，消息，错误
+    _, p, err := conn.ReadMessage()
+    if err != nil {
+      // 用户断开聊天
+      SendGroupMsg(GroupResponse{
+        GroupRequest: GroupRequest{
+          Content: fmt.Sprintf("%s 离开聊天室", addr),
+        },
+        Date: time.Now(),
+      })
+      break
+    }
+
+    // 进行参数绑定，接收聊天的消息
+	//对聊天内容进行处理
+    var request GroupRequest
+    err = json.Unmarshal(p, &request)
+    if err != nil {
+      // 参数绑定失败
+      continue
+    }
+    // 内容不能为空，
+    if strings.TrimSpace(request.Avatar) == "" || strings.TrimSpace(request.NickName) == "" {
+      continue
+    }
+
+    // 判断类型，可以在这里做敏感词过滤
+    switch request.MsgType {
+    case TextMsg:
+      if strings.TrimSpace(request.Content) == "" {
+        continue
+      }
+      SendGroupMsg(GroupResponse{
+        GroupRequest: request,
+        Date:         time.Now(),
+      })
+    case InRoomMsg:
+      request.Content = fmt.Sprintf("%s 进入聊天室", request.NickName)
+      SendGroupMsg(GroupResponse{
+        GroupRequest: request,
+        Date:         time.Now(),
+      })
+    }
+
+  }
+  defer conn.Close()
+  delete(ConnGroupMap, addr)
+}
+
+// SendGroupMsg 群聊功能
+func SendGroupMsg(response GroupResponse) {
+  byteData, _ := json.Marshal(response)
+  for _, conn := range ConnGroupMap {
+    conn.WriteMessage(websocket.TextMessage, byteData)
+  }
+}
+

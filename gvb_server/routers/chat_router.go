@@ -9,8 +9,8 @@ func (router RouterGroup) ChatRouter() {
 	chatApi:= api.ApiGroupApp.ChatApi
 	chat := router.Group("chat")
 	{
-	   //添加广告
-	   chat.GET("connect", chatApi.ChatGroupView)
+	   //测试webscoket
+	   chat.GET("baseConnect", chatApi.ChatBaseView)
 	}
    
   }

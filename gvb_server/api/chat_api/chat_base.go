@@ -9,7 +9,8 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func (ChatApi) ChatGroupView(c *gin.Context) {
+//用于测试webscoket聊天
+func (ChatApi) ChatBaseView(c *gin.Context) {
 	var upGrader = websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
 			// 鉴权 true表示放行，false表示拦截
