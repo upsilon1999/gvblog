@@ -37,16 +37,21 @@ type ChatUser struct {
 
 // 发送的消息类型
 const (
-	//文字消息
-	TextMsg ctype.MsgType = 1
-	//图片消息
-	ImageMsg ctype.MsgType = 2
-	//系统消息
-	SystemMsg ctype.MsgType = 3
 	//进入聊天室消息
-	InRoomMsg ctype.MsgType = 4
+	InRoomMsg ctype.MsgType = 1
+	//文字消息
+	TextMsg ctype.MsgType = 2
+	//图片消息
+	ImageMsg ctype.MsgType = 3
+	//语音消息
+	VoiceMsg ctype.MsgType = 4
+	//视频消息
+	VideoMsg ctype.MsgType=5
+	//系统消息
+	SystemMsg ctype.MsgType = 6
+	
 	//离开聊天室消息
-	OutRoomMsg ctype.MsgType = 5
+	OutRoomMsg ctype.MsgType = 7
 )
 
 
@@ -60,6 +65,7 @@ type GroupRnadResponse struct {
 	Avatar   string    `json:"avatar"`    // 头像
 	MsgType  ctype.MsgType   `json:"msgType"`  // 聊天类型
 	Content  string    `json:"content"`   // 聊天的内容
+	OnlineCount int `json:"onlineCount"` //聊天室在线人数
 	Date     time.Time `json:"date"`      // 消息的时间
 }
 
@@ -97,8 +103,14 @@ func (ChatApi) ChatGroupRandView(c *gin.Context) {
 		if err != nil {
 			// 用户断开聊天
 			SendGroupMsg(conn,GroupRnadResponse{
+				NickName: chatUser.NickName,
+				Avatar:   chatUser.Avatar,
+				MsgType:  OutRoomMsg,
 				Content: fmt.Sprintf("%s 离开聊天室", chatUser.NickName),
 				Date:    time.Now(),
+				//每发一条消息都获取在线人数
+				//离开聊天室应该减少1
+				OnlineCount: len(ConnGroupMap)-1,
 			})
 			break
 		}
@@ -113,6 +125,9 @@ func (ChatApi) ChatGroupRandView(c *gin.Context) {
 				Avatar:   chatUser.Avatar,
 				MsgType:  SystemMsg,
 				Content:  "参数绑定失败",
+				Date:    time.Now(),
+				//每发一条消息都获取在线人数
+				OnlineCount: len(ConnGroupMap),
 			  })
 			// 参数绑定失败
 			continue
@@ -126,6 +141,9 @@ func (ChatApi) ChatGroupRandView(c *gin.Context) {
 					Avatar:   chatUser.Avatar,
 					MsgType:  SystemMsg,
 					Content:  "消息不能为空",
+					Date:    time.Now(),
+					//每发一条消息都获取在线人数
+					OnlineCount: len(ConnGroupMap),
 				})
 				continue
 			}
@@ -135,11 +153,17 @@ func (ChatApi) ChatGroupRandView(c *gin.Context) {
 				Content:  request.Content,
 				MsgType:  TextMsg,
 				Date:     time.Now(),
+				//每发一条消息都获取在线人数
+				OnlineCount: len(ConnGroupMap),
 			})
 		case InRoomMsg:
 			SendGroupMsg(conn,GroupRnadResponse{
+				NickName: chatUser.NickName,
+				Avatar:   chatUser.Avatar,
 				Content: fmt.Sprintf("%s 进入聊天室", chatUser.NickName),
 				Date:    time.Now(),
+				//每发一条消息都获取在线人数
+				OnlineCount: len(ConnGroupMap),
 			})
 		default:
 			SendMsg(addr, GroupRnadResponse{
@@ -147,6 +171,9 @@ func (ChatApi) ChatGroupRandView(c *gin.Context) {
 			  Avatar:   chatUser.Avatar,
 			  MsgType:  SystemMsg,
 			  Content:  "消息类型错误",
+			  Date:    time.Now(),
+			  //每发一条消息都获取在线人数
+			  OnlineCount: len(ConnGroupMap),
 			})
 		}
 

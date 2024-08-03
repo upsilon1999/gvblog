@@ -11,13 +11,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type ChartList struct{
-	models.PageInfo
-	IsGroup bool `json:"isGroup"`
-}
 func (ChatApi) ChatRandListView(c *gin.Context){
-	var cr ChartList
-	fmt.Printf("接收到的前端值为%#v\n",cr)
+	var cr models.PageInfo
+	// fmt.Printf("接收到的前端值为%#v\n",cr)
 	err := c.ShouldBindQuery(&cr)
 	if err !=nil{
 		res.FailWithCode(res.ArgumentError,c)
@@ -25,10 +21,10 @@ func (ChatApi) ChatRandListView(c *gin.Context){
 	}
 
 	cr.Sort = "created_at desc"
-	fmt.Printf("接收到的前端值为%#v\n",cr)
+	// fmt.Printf("接收到的前端值为%#v\n",cr)
 	//过滤是否返回群聊消息
-	list,count,err :=common.ComList(models.ChatModel{IsGroup: false},common.Option{
-		PageInfo: cr.PageInfo,
+	list,count,err :=common.ComList(models.ChatModel{IsGroup: true},common.Option{
+		PageInfo: cr,
 	})
 
 	fmt.Printf("数据为%#v\n",list)
