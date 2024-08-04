@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gvb_server/global"
 	"gvb_server/models"
+	"gvb_server/models/ctype"
 	"gvb_server/models/res"
 	"gvb_server/plugins/log_stash"
 	"gvb_server/utils"
@@ -62,8 +63,24 @@ func (UserApi) EmailLoginView(c *gin.Context) {
 		return
 	}
 
+	//添加登录日志
 	log = log_stash.New(c.ClientIP(),token)
 	log.Info("登录成功")
+
+
+
+	//用户登录后添加用户登录信息，方便统计
+	global.DB.Create(&models.LoginDataModel{
+		UserID: userModel.ID,
+		IP: c.ClientIP(),
+		NickName: userModel.NickName,
+		Token: token,
+		Device: "",
+		Addr: "内网",
+		LoginType: ctype.SignEmail,
+	})
+
+
 	res.OkWithData(token, c)
 
 }

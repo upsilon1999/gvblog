@@ -11,6 +11,7 @@ import (
 	"gvb_server/api/message_api"
 	"gvb_server/api/news_api"
 	"gvb_server/api/settings_api"
+	"gvb_server/api/statistics_api"
 	"gvb_server/api/tag_api"
 	"gvb_server/api/upvote_api"
 	"gvb_server/api/user_api"
@@ -30,6 +31,7 @@ type ApiGroup struct {
 	NewsApi news_api.NewsApi
 	ChatApi chat_api.ChatApi
 	LogApi log_api.LogApi
+	StatisticsApi statistics_api.StatisticsApi
 }
 
 var ApiGroupApp = new(ApiGroup)
