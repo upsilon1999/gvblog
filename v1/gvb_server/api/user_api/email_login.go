@@ -63,8 +63,11 @@ func (UserApi) EmailLoginView(c *gin.Context) {
 		return
 	}
 
+	//可以获取IP城市数据
+	ip,addr := utils.GetAddrByGin(c)
 	//添加登录日志
-	log = log_stash.New(c.ClientIP(),token)
+	// log = log_stash.New(c.ClientIP(),token)
+	log = log_stash.New(ip,token)
 	log.Info("登录成功")
 
 
@@ -72,11 +75,12 @@ func (UserApi) EmailLoginView(c *gin.Context) {
 	//用户登录后添加用户登录信息，方便统计
 	global.DB.Create(&models.LoginDataModel{
 		UserID: userModel.ID,
-		IP: c.ClientIP(),
+		// IP: c.ClientIP(),
+		IP: ip,
 		NickName: userModel.NickName,
 		Token: token,
 		Device: "",
-		Addr: "内网",
+		Addr: addr,
 		LoginType: ctype.SignEmail,
 	})
 

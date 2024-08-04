@@ -6,6 +6,7 @@ import (
 	"gvb_server/flag"
 	"gvb_server/global"
 	"gvb_server/routers"
+	"gvb_server/utils"
 )
 
 // @title API文档
@@ -37,6 +38,11 @@ func main() {
 	//初始化es
 	core.EsConnect()
 
+	
+	//获取ip城市数据
+	core.InitAddrDB()
+	defer global.AddrDB.Close()
+	
 
 	//命令行参数绑定
 	// go run main.go -db
@@ -55,7 +61,9 @@ func main() {
 	router := routers.InitRouter()
 	// 根据system配置来设定监听目标
 	addr:=global.Config.System.Addr()
-	global.Log.Info("gvb_server正在监听:%s",addr)
+	
+	utils.PrintSysInfo()
+
 	err :=router.Run(addr)
 	if(err!=nil){
 		global.Log.Fatalf(err.Error())

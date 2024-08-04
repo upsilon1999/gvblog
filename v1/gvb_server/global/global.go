@@ -3,6 +3,7 @@ package global
 import (
 	"gvb_server/config"
 
+	"github.com/cc14514/go-geoip2"
 	"github.com/olivere/elastic/v7"
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
@@ -23,5 +24,7 @@ var (
 	Redis *redis.Client
 	//全局es
 	ESClient *elastic.Client
+	//通过ip读取城市
+	AddrDB *geoip2.DBReader
 )
 

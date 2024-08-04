@@ -2,6 +2,7 @@ package log_stash
 
 import (
 	"gvb_server/global"
+	"gvb_server/utils"
 	jwts "gvb_server/utils/jwt"
 
 	"github.com/gin-gonic/gin"
@@ -22,10 +23,13 @@ func New(ip string, token string) *Log {
 		userID = claims.UserID
 	}
 
+	//日志这边也获取一下地址
+	addr := utils.GetAddr(ip)
+
 	// 拿到用户id
 	return &Log{
 		ip:     ip,
-		addr:   "内网",
+		addr:   addr,
 		userId: userID,
 	}
 }

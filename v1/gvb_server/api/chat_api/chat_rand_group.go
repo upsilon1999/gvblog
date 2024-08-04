@@ -7,6 +7,7 @@ import (
 	"gvb_server/models"
 	"gvb_server/models/ctype"
 	"gvb_server/models/res"
+	"gvb_server/utils"
 	"net/http"
 	"strings"
 	"time"
@@ -221,6 +222,11 @@ func SendGroupMsg(conn *websocket.Conn, response GroupRnadResponse) {
   
   func getIPAndAddr(_addr string) (ip string, addr string) {
 	addrList := strings.Split(_addr, ":")
-	addr = "内网"
-	return addrList[0], addr
+	// addr = "内网"
+	// return addrList[0], addr
+
+	//根据ip获取真实地址
+	ip = addrList[0]
+	addr = utils.GetAddr(ip)
+	return ip, addr
   }
