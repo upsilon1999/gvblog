@@ -1,9 +1,11 @@
 package user_api
 
 import (
+	"fmt"
 	"gvb_server/global"
 	"gvb_server/models"
 	"gvb_server/models/res"
+	"gvb_server/plugins/log_stash"
 	"gvb_server/utils"
 	jwts "gvb_server/utils/jwt"
 
@@ -23,6 +25,9 @@ func (UserApi) EmailLoginView(c *gin.Context) {
 		return
 	}
 
+	//用户登录初始化日志
+	log:=log_stash.NewLogByGin(c)
+
 
 	//验证用户是否存在
 	var userModel models.UserModel
@@ -31,6 +36,8 @@ func (UserApi) EmailLoginView(c *gin.Context) {
 	if count == 0 {
 		// 没找到
 		global.Log.Warn("用户名不存在")
+		//添加日志记录
+		log.Warn(fmt.Sprintf("%s 用户不存在",cr.UserName))
 		res.FailWithMessage("用户名不存在", c)
 		return
 	}
@@ -38,6 +45,7 @@ func (UserApi) EmailLoginView(c *gin.Context) {
 	isCheck := utils.CheckPwd(userModel.Password, cr.Password)
 	if !isCheck {
 		global.Log.Warn("用户名密码错误")
+		log.Warn(fmt.Sprintf("用户密码错误 %s %s",cr.UserName,cr.Password))
 		res.FailWithMessage("用户密码错误", c)
 		return
 	}
@@ -49,9 +57,13 @@ func (UserApi) EmailLoginView(c *gin.Context) {
 	})
 	if err != nil {
 		global.Log.Error(err)
+		log.Error(fmt.Sprintf("token生成失败 %s",err.Error()))
 		res.FailWithMessage("token生成失败", c)
 		return
 	}
+
+	log = log_stash.New(c.ClientIP(),token)
+	log.Info("登录成功")
 	res.OkWithData(token, c)
 
 }

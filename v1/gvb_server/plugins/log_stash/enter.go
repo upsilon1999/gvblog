@@ -11,7 +11,7 @@ import (
 type Log struct {
 	ip     string `json:"ip"`
 	addr   string `json:"addr"`
-	userId uint   `json:"user_id"`
+	userId uint   `json:"userId"`
 }
 
 func New(ip string, token string) *Log {
@@ -30,7 +30,7 @@ func New(ip string, token string) *Log {
 	}
 }
 
-//入库的方法
+//获取日志信息
 func NewLogByGin(c *gin.Context) *Log {
 	ip := c.ClientIP()
 	token := c.Request.Header.Get("token")
@@ -51,7 +51,7 @@ func (l Log) Error(content string) {
 	l.send(ErrorLevel, content)
 }
 
-//发送日志信息的方法
+//日志信息入库
 func (l Log) send(level Level, content string) {
 	err := global.DB.Create(&LogStashModel{
 		IP:      l.ip,

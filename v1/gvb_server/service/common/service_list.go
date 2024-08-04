@@ -1,6 +1,7 @@
 package common
 
 import (
+	"fmt"
 	"gvb_server/global"
 	"gvb_server/models"
 
@@ -10,6 +11,7 @@ import (
 type Option struct {
 	models.PageInfo
 	Debug bool
+	Likes []string //模糊匹配的字段
 }
 
 //列表查询
@@ -23,7 +25,21 @@ func ComList[T any](model T, option Option) (list []T, count int64, err error) {
 		option.Sort = "created_at desc" // 默认按照时间往前排
 	}
 
-	query := DB.Where(model)
+	DB = DB.Where(model)
+
+	/*
+	这里做模糊匹配查询，根据传入的模糊匹配列表来查
+	注意 select * from table where id = 1 and ip like "%0.1%" or addr like "%网%"
+
+	一般查询与模糊匹配之间用and，模糊匹配与模糊匹配之间用or
+	*/
+	for idx,col := range option.Likes{
+		if idx == 0 {
+			DB.Where(fmt.Sprintf("%s like ?",col),fmt.Sprintf("%%%s%%",option.Key))
+			continue
+		}
+		DB.Or(fmt.Sprintf("%s like ?",col),fmt.Sprintf("%%%s%%",option.Key))
+	}
 
 	/*
 	//由于Select("id")的影响，query变成了只有id一列，我们有两种解决方案
@@ -32,9 +48,11 @@ func ComList[T any](model T, option Option) (list []T, count int64, err error) {
 	count = query.Select("id").Find(&list).RowsAffected
 	query = DB.Where(model)
 	*/
-	count = query.Find(&list).RowsAffected
+	count = DB.Find(&list).RowsAffected
 	//设置默认值
 	//因为新版的gorm不传默认为0
+
+	query := DB.Where(model)
 	if option.Page == 0{
 		option.Page =1
 	}
