@@ -22,6 +22,9 @@ func (router RouterGroup) UserRouter() {
 	   user.POST("logout",middleware.JwtAuth(),UserApi.LogoutView)
 	   //创建用户
 	   user.POST("create",middleware.JwtAdmin(),UserApi.UserCreateView)
+	   //删除用户
+	   user.DELETE("remove",middleware.JwtAdmin(),UserApi.UserRemoveView)
+
 
 	}
    

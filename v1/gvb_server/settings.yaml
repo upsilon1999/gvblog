@@ -45,11 +45,12 @@ qq:
   key: xx
   redirect: xx
 email:
-  host: xxx
+  host: 0.0.0.0
   port: 10
   #发件人邮箱
-  user: xx
-  password: xxx
+  user: 1459894855@qq.com
+  # qq授权码
+  password: sgwdqybkhlbyhfee
   # 默认的发件人名字
   default_from_email: xxx
   #是否使用ssl
