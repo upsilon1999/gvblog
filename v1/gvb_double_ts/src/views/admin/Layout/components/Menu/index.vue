@@ -1,39 +1,151 @@
 <template>
-  <div class="gvb-menu">
-    <a-menu
-      :style="{ width: '200px', height: '100%' }"
-      :default-open-keys="['0']"
-      :default-selected-keys="['0_2']"
-    >
-      <a-sub-menu key="0">
-        <template #icon><icon-apps></icon-apps></template>
-        <template #title>Navigation 1</template>
-        <a-menu-item key="0_0">Menu 1</a-menu-item>
-        <a-menu-item key="0_1">Menu 2</a-menu-item>
-        <a-menu-item key="0_2">Menu 3</a-menu-item>
-        <a-menu-item key="0_3">Menu 4</a-menu-item>
-      </a-sub-menu>
-      <a-sub-menu key="1">
-        <template #icon><icon-bug></icon-bug></template>
-        <template #title>Navigation 2</template>
-        <a-menu-item key="1_0">Menu 1</a-menu-item>
-        <a-menu-item key="1_1">Menu 2</a-menu-item>
-        <a-menu-item key="1_2">Menu 3</a-menu-item>
-      </a-sub-menu>
-      <a-sub-menu key="2">
-        <template #icon><icon-bulb></icon-bulb></template>
-        <template #title>Navigation 3</template>
-        <a-menu-item key="2_0">Menu 1</a-menu-item>
-        <a-menu-item key="2_1">Menu 2</a-menu-item>
-        <a-sub-menu key="2_2" title="Navigation 4">
-          <a-menu-item key="2_2_0">Menu 1</a-menu-item>
-          <a-menu-item key="2_2_1">Menu 2</a-menu-item>
+  <div class="gvb_menu">
+    <!-- 
+      v-model:selected-keys="selectedKeys"
+      v-model:open-keys="openKeys"
+      show-collapse-button
+      @collapse="collapse" -->
+    <a-menu @menu-item-click="clickMenu">
+      <template v-for="item in menuList" :key="item.name">
+        <!-- 要点:根据有无child来渲染子菜单 -->
+        <a-menu-item :key="item.name" v-if="item.child?.length === 0">
+          {{ item.title }}
+          <template #icon>
+            <component :is="item.icon"></component>
+          </template>
+        </a-menu-item>
+        <a-sub-menu v-if="item.child?.length !== 0" :key="item.name">
+          <template #icon>
+            <component :is="item.icon"></component>
+          </template>
+          <template #title>{{ item.title }}</template>
+          <a-menu-item :key="sub.name" v-for="sub in item.child">
+            {{ sub.title }}
+            <template #icon>
+              <component :is="sub.icon"></component>
+            </template>
+          </a-menu-item>
         </a-sub-menu>
-      </a-sub-menu>
+      </template>
     </a-menu>
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { defineComponent, h, ref, watch } from "vue";
+import type { Component } from "vue";
+import {
+  IconMenu,
+  IconUser,
+  IconSettings,
+  IconMessage,
+  IconUserGroup,
+  IconBook,
+  IconHome,
+  IconStorage,
+  IconFile,
+  IconShareAlt,
+  IconImage,
+} from "@arco-design/web-vue/es/icon";
+import { useRoute, useRouter } from "vue-router";
+
+const router = useRouter();
+const route = useRoute();
+
+function getFontComponent(name: string): Component {
+  return defineComponent({
+    render: () => {
+      return h("i", { class: name });
+    },
+  });
+}
+
+//菜单类型
+interface MenuType {
+  title: string;
+  icon?: Component;
+  name?: string; // 路由名字
+  child?: MenuType[];
+}
+
+//菜单列表
+//name是跳转页面
+let menuList: MenuType[] = [
+  { title: "首页", icon: IconHome, name: "home", child: [] },
+  {
+    title: "个人中心",
+    icon: IconUser,
+    name: "user_center",
+    child: [
+      {
+        title: "我的信息",
+        icon: getFontComponent("fa fa-vcard"),
+        name: "user_info",
+      },
+      {
+        title: "我的发布",
+        icon: getFontComponent("fa fa-book"),
+        name: "user_add_article",
+      },
+      {
+        title: "我的收藏",
+        icon: getFontComponent("fa fa-star"),
+        name: "collects",
+      },
+      { title: "我的消息", icon: IconMessage, name: "messages" },
+    ],
+  },
+  {
+    title: "文章管理",
+    icon: IconBook,
+    name: "article_mgr",
+    child: [
+      { title: "文章列表", icon: IconBook, name: "article_list" },
+      { title: "图片列表", icon: IconImage, name: "image_list" },
+      {
+        title: "评论列表",
+        icon: getFontComponent("fa fa-comments"),
+        name: "comment_list",
+      },
+    ],
+  },
+  {
+    title: "用户管理",
+    icon: IconUserGroup,
+    name: "users",
+    child: [
+      { title: "用户列表", icon: IconUserGroup, name: "user_list" },
+      { title: "消息列表", icon: IconMessage, name: "message_list" },
+    ],
+  },
+  {
+    title: "群聊管理",
+    icon: IconMessage,
+    name: "chat_group",
+    child: [{ title: "聊天记录", icon: IconMessage, name: "chat_list" }],
+  },
+  {
+    title: "系统管理",
+    icon: IconSettings,
+    name: "system",
+    child: [
+      { title: "菜单列表", icon: IconMenu, name: "menu_list" },
+      { title: "用户反馈", icon: IconMenu, name: "feedback_list" },
+      { title: "广告列表", icon: IconShareAlt, name: "promotion_list" },
+      { title: "系统日志", icon: IconFile, name: "log_list" },
+      { title: "系统配置", icon: IconStorage, name: "system_system" },
+    ],
+  },
+];
+
+const clickMenu = (name: string) => {
+  /*
+    为了配合以后的权限路由，最好改成path跳转
+  */
+  router.push({
+    name: name,
+  });
+};
+</script>
 
 <style scoped lang="scss"></style>
