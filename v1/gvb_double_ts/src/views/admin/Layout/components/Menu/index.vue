@@ -1,11 +1,8 @@
 <template>
-  <div class="gvb_menu">
-    <!-- 
-      v-model:selected-keys="selectedKeys"
-      v-model:open-keys="openKeys"
-      show-collapse-button
-      @collapse="collapse" -->
-    <a-menu @menu-item-click="clickMenu">
+  <div class="gvb-menu">
+    <a-menu @menu-item-click="clickMenu" v-model:selected-keys="selectedKeys"
+		v-model:open-keys="openKeys" show-collapse-button
+		@collapse="collapse">
       <template v-for="item in menuList" :key="item.path">
         <!-- 要点:根据有无child来渲染子菜单 -->
         <a-menu-item :key="item.path" v-if="item.child?.length === 0">
@@ -34,6 +31,7 @@
 <script setup lang="ts">
 import { defineComponent, h, ref, watch } from "vue";
 import type { Component } from "vue";
+import useSettingStore from '@/stores/modules/settings';
 import {
   IconMenu,
   IconUser,
@@ -49,6 +47,12 @@ import {
 } from "@arco-design/web-vue/es/icon";
 import { useRoute, useRouter } from "vue-router";
 
+/*
+	侧边栏的收缩状态，如何存储
+	除了menu组件用，index组件也要用，logo最近也要用，所以可以将这个状态写入到pinia
+	也可以写入在index组件用v-model，在menu组件变化，父组件知道，兄弟组件也知道
+*/
+const settingStore = useSettingStore()
 const router = useRouter();
 const route = useRoute();
 
@@ -148,6 +152,8 @@ let menuList: MenuType[] = [
   },
 ];
 
+//点击菜单跳转路由
+//参数是菜单key值
 const clickMenu = (path: string) => {
   /*
     为了配合以后的权限路由，最好改成path跳转
@@ -155,9 +161,36 @@ const clickMenu = (path: string) => {
   router.push({
     path: path,
   });
-
-	
 };
+
+const selectedKeys = ref([route.name])
+const openKeys = ref([route.matched[1].name])
+watch(()=>route.name, ()=>{
+  selectedKeys.value = [route.name]
+  openKeys.value = [route.matched[1].name]
+})
+
+
+function collapse(collapsed: boolean) {
+  settingStore.setCollapsed(collapsed)
+}
 </script>
 
-<style scoped lang="scss"></style>
+<style lang="scss">
+.gvb-menu {
+  .arco-menu {
+    position: inherit;
+  }
+
+  .arco-menu-collapse-button {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translate(50%, -50%);
+    opacity: 0;
+    transition: all .3s;
+  }
+}
+
+
+</style>

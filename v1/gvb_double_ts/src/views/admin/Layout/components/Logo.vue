@@ -10,7 +10,7 @@
 
 <script setup lang="ts"></script>
 
-<style scoped lang="scss">
+<style lang="scss">
 .gvb-logo {
   height: 90px;
   display: flex;
@@ -34,6 +34,21 @@
     }
     > span:nth-child(2) {
       font-size: 12px;
+    }
+  }
+}
+
+.collapsed {
+  .gvb-logo {
+    padding: 2px;
+
+    img {
+      width: 42px;
+      height: 42px;
+    }
+
+    .logo-head {
+      transform: scale(0);
     }
   }
 }

@@ -3,9 +3,7 @@
     <!-- 前往首页 -->
     <IconHome class="action-icon"></IconHome>
     <!-- 主题切换按钮 -->
-    <div class="gvb_theme">
-      <IconSun class="action-icon"></IconSun>
-    </div>
+    <GvbTheme/>
     <!-- 
               个人信息区域
               主题是图片名字
@@ -42,17 +40,18 @@ import {
   IconBug,
   IconBulb,
 } from "@arco-design/web-vue/es/icon";
+import GvbTheme from './GvbTheme/index.vue'
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 .gvb-func-area {
   display: flex;
   align-items: center;
   .action-icon {
-    margin-right: 10px;
-    font-size: 15px;
-    cursor: pointer;
-  }
+		margin-right: 10px;
+		font-size: 15px;
+		cursor: pointer;
+	}
   .gvb-person-info {
     cursor: pointer;
     .gvb-avatar {

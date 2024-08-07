@@ -5,7 +5,7 @@
           固定240px，当屏幕宽度过窄时需要自动收起
           分为头部logo区域和下部菜单区域
       -->
-    <aside>
+    <aside :class="{collapsed:isCollapsed }">
       <!-- logo区域 分为左右结构，左侧是图片，右侧是文字  -->
       <Logo />
       <!-- 菜单区域 -->
@@ -24,9 +24,10 @@
       </div>
 
       <div class="gvb-tabs">
-        <span class="gvb-tab active">首页</span>
+        <!-- <span class="gvb-tab active">首页</span>
         <span class="gvb-tab">用户列表</span>
-        <span class="gvb-tab">文章列表</span>
+        <span class="gvb-tab">文章列表</span> -->
+				<Tabs/>
       </div>
       <!-- 内容区域 -->
       <div class="gvb-container">
@@ -40,21 +41,52 @@
 import { RouterView } from "vue-router";
 import Logo from "./components/Logo.vue";
 import Menu from "./components/Menu/index.vue";
+import Tabs from "./components/Tabs.vue"
 import BreadCrumbs from "./components/BreadCrumbs.vue";
 import FuncArea from "./components/FuncArea/index.vue";
+import useSettingStore from '@/stores/modules/settings';
+import { computed } from "vue";
+const settingStore = useSettingStore()
+const isCollapsed = computed(()=>settingStore.getCollapsed())
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
 .gvb-admin {
   display: flex;
 
   aside {
     width: 240px;
 
-    //左侧灰色分隔线
-    border-right: 1px solid var(--bg);
-    height: 100dvh;
+		//左侧灰色分隔线
+		border-right: 1px solid var(--bg);
+    height: 100vh;
+
+    background-color: var(--color-bg-1);
+    transition: all .3s;
+    position: relative;
+    .gvb-menu{
+      height: calc(100vh - 90px);
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
   }
+
+	aside.collapsed {
+    width: 48px;
+
+    & ~ main {
+      width: calc(100% - 48px);
+    }
+  }
+
+	aside:hover {
+		.gvb-menu {
+			.arco-menu-collapse-button {
+				opacity: 1;
+			}
+		}
+	}
+
 
   main {
     //注意calc的减号两端要留空格，否则会报错
