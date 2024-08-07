@@ -1,8 +1,12 @@
 <template>
   <div class="gvb-menu">
-    <a-menu @menu-item-click="clickMenu" v-model:selected-keys="selectedKeys"
-		v-model:open-keys="openKeys" show-collapse-button
-		@collapse="collapse">
+    <a-menu
+      @menu-item-click="clickMenu"
+      v-model:selected-keys="selectedKeys"
+      v-model:open-keys="openKeys"
+      show-collapse-button
+      @collapse="collapse"
+    >
       <template v-for="item in menuList" :key="item.path">
         <!-- 要点:根据有无child来渲染子菜单 -->
         <a-menu-item :key="item.path" v-if="item.child?.length === 0">
@@ -31,7 +35,7 @@
 <script setup lang="ts">
 import { defineComponent, h, ref, watch } from "vue";
 import type { Component } from "vue";
-import useSettingStore from '@/stores/modules/settings';
+import useSettingStore from "@/stores/modules/settings";
 import {
   IconMenu,
   IconUser,
@@ -52,7 +56,7 @@ import { useRoute, useRouter } from "vue-router";
 	除了menu组件用，index组件也要用，logo最近也要用，所以可以将这个状态写入到pinia
 	也可以写入在index组件用v-model，在menu组件变化，父组件知道，兄弟组件也知道
 */
-const settingStore = useSettingStore()
+const settingStore = useSettingStore();
 const router = useRouter();
 const route = useRoute();
 
@@ -69,54 +73,69 @@ interface MenuType {
   title: string;
   icon?: Component;
   name?: string; // 路由名字
-	path?:string,//路由路径
+  path?: string; //路由路径
   child?: MenuType[];
 }
 
 //菜单列表
 //name是跳转页面
 let menuList: MenuType[] = [
-  { title: "首页", icon: IconHome, name: "home",path:"/admin", child: [] },
+  { title: "首页", icon: IconHome, name: "home", path: "/admin", child: [] },
   {
     title: "个人中心",
     icon: IconUser,
     name: "userCenter",
-		path:"/admin/userCenter",
+    path: "/admin/userCenter",
     child: [
       {
         title: "我的信息",
         icon: getFontComponent("fa fa-vcard"),
         name: "userInfo",
-				path:"/admin/userCenter/userInfo"
+        path: "/admin/userCenter/userInfo",
       },
       {
         title: "我的发布",
         icon: getFontComponent("fa fa-book"),
         name: "userArticle",
-				path:"/admin/userCenter/userArticle"
+        path: "/admin/userCenter/userArticle",
       },
       {
         title: "我的收藏",
         icon: getFontComponent("fa fa-star"),
         name: "collects",
-				path:"/admin/userCenter/collects"
+        path: "/admin/userCenter/collects",
       },
-      { title: "我的消息", icon: IconMessage, name: "messages",path:"/admin/userCenter/messages" },
+      {
+        title: "我的消息",
+        icon: IconMessage,
+        name: "messages",
+        path: "/admin/userCenter/messages",
+      },
     ],
   },
   {
     title: "文章管理",
     icon: IconBook,
     name: "articleMgr",
-		path:"/admin/articleMgr",
+    path: "/admin/articleMgr",
     child: [
-      { title: "文章列表", icon: IconBook, name: "articleList",path:"/admin/articleMgr/articleList" },
-      { title: "图片列表", icon: IconImage, name: "imageList",path:"/admin/articleMgr/imageList" },
+      {
+        title: "文章列表",
+        icon: IconBook,
+        name: "articleList",
+        path: "/admin/articleMgr/articleList",
+      },
+      {
+        title: "图片列表",
+        icon: IconImage,
+        name: "imageList",
+        path: "/admin/articleMgr/imageList",
+      },
       {
         title: "评论列表",
         icon: getFontComponent("fa fa-comments"),
         name: "commentList",
-				path:"/admin/articleMgr/commentList"
+        path: "/admin/articleMgr/commentList",
       },
     ],
   },
@@ -124,30 +143,72 @@ let menuList: MenuType[] = [
     title: "用户管理",
     icon: IconUserGroup,
     name: "usersMgr",
-		path:"/admin/usersMgr",
+    path: "/admin/usersMgr",
     child: [
-      { title: "用户列表", icon: IconUserGroup, name: "userList",path:"/admin/usersMgr/userList" },
-      { title: "消息列表", icon: IconMessage, name: "messageList",path:"/admin/usersMgr/messageList"},
+      {
+        title: "用户列表",
+        icon: IconUserGroup,
+        name: "userList",
+        path: "/admin/usersMgr/userList",
+      },
+      {
+        title: "消息列表",
+        icon: IconMessage,
+        name: "messageList",
+        path: "/admin/usersMgr/messageList",
+      },
     ],
   },
   {
     title: "群聊管理",
     icon: IconMessage,
     name: "chatGroup",
-		path:"chatGroup",
-    child: [{ title: "聊天记录", icon: IconMessage, name: "chatList",path:"/admin/chatGroup/chatList" }],
+    path: "chatGroup",
+    child: [
+      {
+        title: "聊天记录",
+        icon: IconMessage,
+        name: "chatList",
+        path: "/admin/chatGroup/chatList",
+      },
+    ],
   },
   {
     title: "系统管理",
     icon: IconSettings,
     name: "systemMgr",
-		path:"/admin/systemMgr",
+    path: "/admin/systemMgr",
     child: [
-      { title: "菜单列表", icon: IconMenu, name: "menuList",path:"/admin/systemMgr/menuList" },
-      { title: "用户反馈", icon: IconMenu, name: "feedbackList",path:"/admin/systemMgr/feedbackList" },
-      { title: "广告列表", icon: IconShareAlt, name: "promotionList",path:"/admin/systemMgr/promotionList" },
-      { title: "系统日志", icon: IconFile, name: "logList",path:"/admin/systemMgr/logList" },
-      { title: "系统配置", icon: IconStorage,name:"configList", path: "/admin/systemMgr/configList" },
+      {
+        title: "菜单列表",
+        icon: IconMenu,
+        name: "menuList",
+        path: "/admin/systemMgr/menuList",
+      },
+      {
+        title: "用户反馈",
+        icon: IconMenu,
+        name: "feedbackList",
+        path: "/admin/systemMgr/feedbackList",
+      },
+      {
+        title: "广告列表",
+        icon: IconShareAlt,
+        name: "promotionList",
+        path: "/admin/systemMgr/promotionList",
+      },
+      {
+        title: "系统日志",
+        icon: IconFile,
+        name: "logList",
+        path: "/admin/systemMgr/logList",
+      },
+      {
+        title: "系统配置",
+        icon: IconStorage,
+        name: "configList",
+        path: "/admin/systemMgr/configList",
+      },
     ],
   },
 ];
@@ -163,16 +224,18 @@ const clickMenu = (path: string) => {
   });
 };
 
-const selectedKeys = ref([route.name])
-const openKeys = ref([route.matched[1].name])
-watch(()=>route.name, ()=>{
-  selectedKeys.value = [route.name]
-  openKeys.value = [route.matched[1].name]
-})
-
+const selectedKeys = ref([route.path]);
+const openKeys = ref([route.matched[1].path]);
+watch(
+  () => route.path,
+  () => {
+    selectedKeys.value = [route.path];
+    openKeys.value = [route.matched[1].path];
+  }
+);
 
 function collapse(collapsed: boolean) {
-  settingStore.setCollapsed(collapsed)
+  settingStore.setCollapsed(collapsed);
 }
 </script>
 
@@ -188,9 +251,7 @@ function collapse(collapsed: boolean) {
     top: 50%;
     transform: translate(50%, -50%);
     opacity: 0;
-    transition: all .3s;
+    transition: all 0.3s;
   }
 }
-
-
 </style>
