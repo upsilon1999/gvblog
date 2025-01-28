@@ -94,6 +94,8 @@ redis:
   password: "123456789"
   #连接池大小
   pool_size: 100
+  # redis版本
+  version: 5.0.14.1
 es:
   #es服务地址
   host: "http://127.0.0.1"
@@ -103,3 +105,5 @@ es:
   username:
   # 密码，未设置为空
   password:
+  # 版本:方便维护
+  version: 7.12.0
